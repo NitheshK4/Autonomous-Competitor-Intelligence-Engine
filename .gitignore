@@ -1,0 +1,29 @@
+# Node dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Production builds
+client/dist/
+dist/
+
+# Local databases and caches
+server/data/database.sqlite
+server/data/prompt_*.txt
+server/cache/
+server/bin/
+server/data/qwen2.5-0.5b-instruct-q4_k_m.gguf
+
+# Environment variables and API keys
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

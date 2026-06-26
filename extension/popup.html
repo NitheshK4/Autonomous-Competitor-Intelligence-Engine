@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 320px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0b0f19;
+      color: #f8fafc;
+      margin: 0;
+      padding: 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 10px;
+    }
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      background-color: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 8px;
+      color: #f8fafc;
+      font-size: 13px;
+      box-sizing: border-box;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: #38bdf8;
+    }
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .btn:disabled {
+      background: #1e293b;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      font-size: 11px;
+      border-top: 1px solid #1e293b;
+      padding-top: 8px;
+    }
+    .footer a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    .alert {
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .alert-danger {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span style="font-size: 18px;">🤖</span>
+    <h3 class="title">Add Competitor Webpage</h3>
+  </div>
+
+  <div id="alertBox" class="alert"></div>
+
+  <div id="mainForm">
+    <div class="form-group">
+      <label for="url">Website URL</label>
+      <input type="url" id="url" required>
+    </div>
+
+    <div class="form-group">
+      <label for="name">Competitor Name</label>
+      <input type="text" id="name" placeholder="E.g., Acme Corp" required>
+    </div>
+
+    <div class="form-group">
+      <label for="scope">Monitoring Scope</label>
+      <select id="scope">
+        <option value="full">Full Page Content</option>
+        <option value="pricing">Pricing Section Only</option>
+        <option value="careers">Careers / Jobs Only</option>
+      </select>
+    </div>
+
+    <button id="addBtn" class="btn">Add Competitor</button>
+  </div>
+
+  <div class="footer">
+    <span style="color: #64748b;">ACIE Extension v1.0</span>
+    <a href="#" id="optionsLink">Configure Server Settings</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

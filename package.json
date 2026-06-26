@@ -1,0 +1,21 @@
+{
+  "name": "autonomous-competitor-intelligence-engine",
+  "version": "1.0.0",
+  "description": "Autonomous Competitor Intelligence Engine (Web App + Chrome Extension)",
+  "main": "server/src/index.js",
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "server": "npm start --prefix server",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build:client": "npm run build --prefix client",
+    "start": "NODE_ENV=production npm start --prefix server",
+    "test": "node server/src/verify-test.js"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
