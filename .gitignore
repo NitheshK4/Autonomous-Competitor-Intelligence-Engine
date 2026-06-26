@@ -11,6 +11,7 @@ dist/
 server/data/database.sqlite
 server/data/prompt_*.txt
 server/cache/
+server/public/screenshots/
 server/bin/
 server/data/qwen2.5-0.5b-instruct-q4_k_m.gguf
 
