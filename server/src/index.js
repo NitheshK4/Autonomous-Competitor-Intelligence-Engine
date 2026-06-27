@@ -256,11 +256,13 @@ app.get('/api/settings', async (req, res) => {
     const emailConfigStr = await db.getSetting('email_config');
     const crmConfigStr = await db.getSetting('crm_config');
     const semantic_threshold = await db.getSetting('semantic_threshold') || '0.85';
+    const slack_webhook_url = await db.getSetting('slack_webhook_url') || '';
 
     res.json({
       api_key,
       digest_schedule,
       last_digest_sent,
+      slack_webhook_url,
       semantic_threshold: parseFloat(semantic_threshold),
       email_config: emailConfigStr ? JSON.parse(emailConfigStr) : {},
       crm_config: crmConfigStr ? JSON.parse(crmConfigStr) : {}
@@ -272,11 +274,12 @@ app.get('/api/settings', async (req, res) => {
 
 app.post('/api/settings', async (req, res) => {
   try {
-    const { api_key, digest_schedule, semantic_threshold, email_config, crm_config } = req.body;
+    const { api_key, digest_schedule, semantic_threshold, email_config, crm_config, slack_webhook_url } = req.body;
 
     if (api_key) await db.setSetting('api_key', api_key);
     if (digest_schedule) await db.setSetting('digest_schedule', digest_schedule);
     if (semantic_threshold) await db.setSetting('semantic_threshold', semantic_threshold.toString());
+    if (slack_webhook_url !== undefined) await db.setSetting('slack_webhook_url', slack_webhook_url);
     
     if (email_config) {
       await db.setSetting('email_config', JSON.stringify(email_config));

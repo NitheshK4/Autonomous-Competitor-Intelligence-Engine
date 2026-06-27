@@ -41,10 +41,12 @@ The **Autonomous Competitor Intelligence Engine** is a fully automated, self-con
 
 1. **Express & React Frontend**: Served as a single unified server in production. React compiles to static assets, and Express serves it from the same port to save RAM overhead.
 2. **Sequential Background Queue**: Prevents OOM (Out Of Memory) crashes by running only one scraping and analysis job at a time.
-3. **Double-Engine Scraper**: Uses standard HTTP requests (Cheerio) for speed and fallback Puppeteer (optimized to block styles/images) for dynamic JavaScript pages. Captures screenshots for visual archives.
-4. **Local ONNX Embeddings**: Runs `all-MiniLM-L6-v2` locally via `@huggingface/transformers` to compute paragraph-level cosine similarity. Cosmetic shifts (such as footers, navigational changes, and cookie prompts) are stripped out during scraping or ignored during semantic matching.
-5. **Local CPU LLM Runner**: Spawns a standalone C++ `llama-cli` process to run a quantized GGUF model and exits immediately upon completion.
-6. **Notion & Airtable Integrations**: Supports both CRMs with duplicate checks (idempotency) and a failure queue stored in SQLite.
+3. **Double-Engine Scraper (Enrichment Source 1)**: Uses standard HTTP requests (Cheerio) for speed and fallback Puppeteer (optimized to block styles/images) for dynamic JavaScript pages. Captures screenshots for visual archives.
+4. **DNS & Headers Enrichment (Enrichment Source 2)**: Resolves A and MX records dynamically and analyzes HTTP response headers to identify server engines and software frames. Displayed in the competitor details panel.
+5. **Local ONNX Embeddings**: Runs `all-MiniLM-L6-v2` locally via `@huggingface/transformers` to compute paragraph-level cosine similarity. Cosmetic shifts (such as footers, navigational changes, and cookie prompts) are stripped out during scraping or ignored during semantic matching.
+6. **Local CPU LLM Runner**: Spawns a standalone C++ `llama-cli` process to run a quantized GGUF model and exits immediately upon completion.
+7. **Notion & Airtable Integrations**: Supports both CRMs with duplicate checks (filter queries run prior to inserting records) to guarantee 100% write idempotency. Failed writes are queued in SQLite for automatic retry loops.
+8. **Real-time Slack Notifications**: Dispatches rich Slack attachments immediately to a configurable webhook when high-threat competitor shifts (impact score >= 8) are discovered.
 
 ---
 

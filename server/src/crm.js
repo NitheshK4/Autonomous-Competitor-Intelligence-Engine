@@ -56,12 +56,43 @@ async function syncCard(card, config, hostUrl = 'http://localhost:3000') {
 async function syncToNotion(card, config, screenshotUrl) {
   const notion = new Client({ auth: config.notion_token });
 
+  const cardTitle = `[${card.category.toUpperCase()}] ${card.competitor_name}`;
+
+  // Idempotency check: Search database for an existing entry with the same card title or URL
+  try {
+    const existing = await notion.databases.query({
+      database_id: config.notion_db_id,
+      filter: {
+        and: [
+          {
+            property: 'URL',
+            url: {
+              equals: card.competitor_url
+            }
+          },
+          {
+            property: 'Title',
+            title: {
+              equals: cardTitle
+            }
+          }
+        ]
+      }
+    });
+    if (existing.results && existing.results.length > 0) {
+      console.log(`Card ${card.id} already exists in Notion. Skipping duplicate write.`);
+      return;
+    }
+  } catch (err) {
+    console.warn('Notion duplicate query failed, proceeding with create:', err.message);
+  }
+
   const properties = {
     'Title': {
       title: [
         {
           text: {
-            content: `[${card.category.toUpperCase()}] ${card.competitor_name}`
+            content: cardTitle
           }
         }
       ]
@@ -127,9 +158,28 @@ async function syncToNotion(card, config, screenshotUrl) {
 async function syncToAirtable(card, config, screenshotUrl) {
   const tableName = config.airtable_table_name || 'Competitor Intel';
   const url = `https://api.airtable.com/v0/${config.airtable_base_id}/${encodeURIComponent(tableName)}`;
+  const cardTitle = `[${card.category.toUpperCase()}] ${card.competitor_name}`;
+
+  // Idempotency check: Search Airtable for an existing entry with the same title and URL
+  try {
+    const filterFormula = `AND({URL}='${card.competitor_url.replace(/'/g, "\\'")}', {Title}='${cardTitle.replace(/'/g, "\\'")}')`;
+    const checkUrl = `${url}?filterByFormula=${encodeURIComponent(filterFormula)}`;
+    const checkRes = await axios.get(checkUrl, {
+      headers: {
+        'Authorization': `Bearer ${config.airtable_key}`
+      },
+      timeout: 6000
+    });
+    if (checkRes.data && checkRes.data.records && checkRes.data.records.length > 0) {
+      console.log(`Card ${card.id} already exists in Airtable. Skipping duplicate write.`);
+      return;
+    }
+  } catch (err) {
+    console.warn('Airtable duplicate query failed, proceeding with create:', err.message);
+  }
 
   const fields = {
-    'Title': `[${card.category.toUpperCase()}] ${card.competitor_name}`,
+    'Title': cardTitle,
     'Competitor Name': card.competitor_name,
     'URL': card.competitor_url,
     'Category': card.category,

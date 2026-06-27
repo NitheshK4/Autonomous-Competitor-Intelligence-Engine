@@ -1041,6 +1041,62 @@ function DetailsPage({ competitorId, competitors, onBack, onDelete, onCheckNow, 
               Save Configurations
             </button>
           </form>
+
+          {(() => {
+            let enrichment = null;
+            if (competitor.enrichment_data) {
+              try {
+                enrichment = JSON.parse(competitor.enrichment_data);
+              } catch (e) {}
+            }
+            if (!enrichment) return null;
+            return (
+              <div className="glass-panel" style={{ marginTop: '24px', padding: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                <h4 style={{ fontSize: '13px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, margin: '0 0 12px 0', borderBottom: '1px dashed rgba(255,255,255,0.05)', paddingBottom: '6px' }}>
+                  🔍 Data Enrichment (Source 2)
+                </h4>
+                <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div>
+                    <strong style={{ color: 'var(--text-secondary)' }}>Server Tech Header:</strong>
+                    <div style={{ color: '#38bdf8', fontFamily: 'monospace', fontSize: '12px', marginTop: '2px' }}>{enrichment.serverHeader || 'Unknown'}</div>
+                  </div>
+                  {enrichment.xPoweredBy && (
+                    <div>
+                      <strong style={{ color: 'var(--text-secondary)' }}>Powered By:</strong>
+                      <div style={{ color: '#38bdf8', fontFamily: 'monospace', fontSize: '12px', marginTop: '2px' }}>{enrichment.xPoweredBy}</div>
+                    </div>
+                  )}
+                  <div>
+                    <strong style={{ color: 'var(--text-secondary)' }}>DNS A Records (IPs):</strong>
+                    {enrichment.ipAddresses && enrichment.ipAddresses.length > 0 ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+                        {enrichment.ipAddresses.map((ip, i) => (
+                          <span key={i} style={{ background: 'rgba(56,189,248,0.1)', color: '#38bdf8', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace' }}>{ip}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>None resolved</div>
+                    )}
+                  </div>
+                  <div>
+                    <strong style={{ color: 'var(--text-secondary)' }}>DNS MX Records (Mail):</strong>
+                    {enrichment.mxRecords && enrichment.mxRecords.length > 0 ? (
+                      <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px', fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                        {enrichment.mxRecords.slice(0, 3).map((mx, i) => (
+                          <li key={i}>{mx}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>None resolved</div>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px' }}>
+                    Enriched: {new Date(enrichment.checkedAt).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </aside>
       </div>
     </div>
@@ -1078,6 +1134,7 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
 
   const [threshold, setThreshold] = useState(settings?.semantic_threshold || 0.85);
   const [schedule, setSchedule] = useState(settings?.digest_schedule || 'daily');
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState(settings?.slack_webhook_url || '');
 
   // Keep state synchronized with props when they load or change
   useEffect(() => {
@@ -1111,6 +1168,7 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
       });
       setThreshold(settings.semantic_threshold ?? 0.85);
       setSchedule(settings.digest_schedule || 'daily');
+      setSlackWebhookUrl(settings.slack_webhook_url || '');
     }
   }, [settings]);
 
@@ -1126,7 +1184,8 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
       digest_schedule: schedule,
       semantic_threshold: threshold,
       email_config: emailForm,
-      crm_config: crmForm
+      crm_config: crmForm,
+      slack_webhook_url: slackWebhookUrl
     });
   };
 
@@ -1253,6 +1312,20 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
                   <option value="daily">Daily Digest Email</option>
                   <option value="weekly">Weekly Digest Email</option>
                 </select>
+              </div>
+
+              <div className="form-group" style={{ marginTop: '15px' }}>
+                <label className="form-label">Slack Webhook URL (Real-time Alerts)</label>
+                <input 
+                  type="url" 
+                  className="form-input"
+                  value={slackWebhookUrl}
+                  onChange={e => setSlackWebhookUrl(e.target.value)}
+                  placeholder="https://hooks.slack.com/services/..."
+                />
+                <div className="form-help">
+                  Real-time Slack alerts will be sent immediately for high-impact events (score 8 or above).
+                </div>
               </div>
             </div>
 

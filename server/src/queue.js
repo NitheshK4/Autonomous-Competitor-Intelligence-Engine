@@ -2,6 +2,8 @@ const { runScrape } = require('./scraper');
 const { detectChanges } = require('./detector');
 const { analyzeChange } = require('./llm');
 const { syncCard, runRetryQueue } = require('./crm');
+const { getEnrichmentData } = require('./enrichment');
+const { sendSlackNotification } = require('./slack');
 const db = require('./db');
 const { v4: uuidv4 } = require('uuid');
 
@@ -61,6 +63,16 @@ async function processNextJob() {
       screenshot_path: scrapeResult.screenshotPath
     });
 
+    // Run data enrichment (2nd data source: DNS and Headers)
+    try {
+      const enrichData = await getEnrichmentData(competitor.url);
+      if (enrichData) {
+        await db.updateCompetitor(competitorId, { enrichment_data: JSON.stringify(enrichData) });
+      }
+    } catch (enrichErr) {
+      console.error('Enrichment execution failed:', enrichErr.message);
+    }
+
     // 2. Fetch the previous scrape for semantic diff comparison
     const scrapes = await db.getScrapeHistory(competitorId);
     // scrapes[0] is the current scrape just saved, scrapes[1] is the previous one
@@ -102,6 +114,21 @@ async function processNextJob() {
       };
 
       await db.saveIntelligenceCard(newCard);
+
+      // Send real-time Slack notification for high impact changes (score >= 8)
+      if (newCard.impact_score >= 8) {
+        try {
+          const slackUrl = await db.getSetting('slack_webhook_url');
+          if (slackUrl) {
+            await sendSlackNotification({
+              ...newCard,
+              competitor_url: competitor.url
+            }, competitor.name, slackUrl);
+          }
+        } catch (slackErr) {
+          console.error('Slack notification dispatch failed:', slackErr.message);
+        }
+      }
 
       // 6. Push to CRM
       console.log(`Syncing intelligence card to CRM...`);

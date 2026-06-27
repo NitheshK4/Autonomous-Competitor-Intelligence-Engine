@@ -83,11 +83,19 @@ async function getDb() {
     );
   `);
 
+  // Try adding enrichment_data column to competitors table dynamically
+  try {
+    await dbInstance.exec('ALTER TABLE competitors ADD COLUMN enrichment_data TEXT');
+  } catch (e) {
+    // Column already exists, safe to ignore
+  }
+
   // Insert default settings if they don't exist
   const defaultSettings = [
     { key: 'api_key', value: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) },
     { key: 'digest_schedule', value: 'daily' }, // 'daily', 'weekly'
     { key: 'last_digest_sent', value: '' },
+    { key: 'slack_webhook_url', value: '' },
     { key: 'email_config', value: JSON.stringify({ provider: 'smtp', smtp_host: '', smtp_port: 587, smtp_user: '', smtp_pass: '', recipient_email: '' }) },
     { key: 'crm_config', value: JSON.stringify({ active_crm: 'none', notion_token: '', notion_db_id: '', airtable_key: '', airtable_base_id: '', airtable_table_name: 'Competitor Intel' }) }
   ];
