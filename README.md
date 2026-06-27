@@ -2,93 +2,6 @@
 
 <div align="center">
 
-<!-- Animated SVG Banner Widget -->
-<svg width="100%" height="160" viewBox="0 0 800 160" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-width: 800px; border-radius: 12px; border: 1px solid #1E293B; background: #0B0F19; box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
-  <style>
-    @keyframes pulse {
-      0% { r: 5px; opacity: 1; }
-      50% { r: 25px; opacity: 0.3; }
-      100% { r: 45px; opacity: 0; }
-    }
-    @keyframes sweep {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    @keyframes dash {
-      to { stroke-dashoffset: -20; }
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
-    @keyframes pulseNode {
-      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px #38BDF8); }
-      50% { transform: scale(1.05); filter: drop-shadow(0 0 8px #38BDF8); }
-    }
-    .radar-circle {
-      transform-origin: 100px 80px;
-      animation: pulse 3s infinite linear;
-    }
-    .radar-sweep {
-      transform-origin: 100px 80px;
-      animation: sweep 5s infinite linear;
-    }
-    .flow-line {
-      stroke-dasharray: 6 3;
-      animation: dash 1.5s infinite linear;
-    }
-    .status-dot {
-      animation: blink 1.2s infinite ease-in-out;
-    }
-    .pulsing-node {
-      transform-origin: center;
-      animation: pulseNode 3s infinite ease-in-out;
-    }
-  </style>
-
-  <!-- Background Grid -->
-  <path d="M 0 40 L 800 40 M 0 80 L 800 80 M 0 120 L 800 120 M 200 0 L 200 160 M 400 0 L 400 160 M 600 0 L 600 160" stroke="#1E293B" stroke-width="0.5" opacity="0.3" />
-
-  <!-- Radar Scanner -->
-  <circle cx="100" cy="80" r="50" fill="none" stroke="#10B981" stroke-dasharray="2 3" opacity="0.2"/>
-  <circle cx="100" cy="80" r="30" fill="none" stroke="#10B981" stroke-dasharray="2 3" opacity="0.4"/>
-  <circle cx="100" cy="80" r="10" fill="none" stroke="#10B981" opacity="0.6"/>
-  <circle class="radar-circle" cx="100" cy="80" r="10" fill="none" stroke="#10B981" stroke-width="1.5"/>
-  <line class="radar-sweep" x1="100" y1="80" x2="100" y2="30" stroke="#10B981" stroke-width="2" opacity="0.8"/>
-
-  <!-- Radar Status Texts -->
-  <text x="170" y="55" fill="#E2E8F0" font-family="system-ui, sans-serif" font-size="15" font-weight="bold">Competitor Scan Radar</text>
-  <circle class="status-dot" cx="178" cy="75" r="4.5" fill="#10B981"/>
-  <text x="190" y="79" fill="#10B981" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" letter-spacing="1">ACTIVE MONITORING</text>
-  <text x="170" y="108" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="11">Polling 6h intervals | Semantic Diff Engine Loaded</text>
-
-  <!-- Flow Pipeline System -->
-  <g transform="translate(480, 0)">
-    <!-- Connecting flow paths -->
-    <path class="flow-line" d="M 60 80 L 110 80" stroke="#38BDF8" stroke-width="1.5" fill="none"/>
-    <path class="flow-line" d="M 170 80 L 220 80" stroke="#38BDF8" stroke-width="1.5" fill="none"/>
-    <path class="flow-line" d="M 140 95 L 140 125 L 220 125" stroke="#F43F5E" stroke-width="1.5" fill="none"/>
-
-    <!-- Scraper Node -->
-    <rect x="-10" y="65" width="70" height="30" rx="6" fill="#1E293B" stroke="#38BDF8" stroke-width="1"/>
-    <text x="25" y="84" fill="#E2E8F0" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle" font-weight="600">Scraper</text>
-    
-    <!-- Embedder Node -->
-    <rect x="110" y="65" width="60" height="30" rx="6" fill="#1E293B" stroke="#38BDF8" stroke-width="1"/>
-    <text x="140" y="84" fill="#E2E8F0" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle" font-weight="600">AI Diff</text>
-    
-    <!-- Notion / CRM Sync Node -->
-    <rect x="220" y="65" width="80" height="30" rx="6" fill="#090D16" stroke="#10B981" stroke-width="1.5" />
-    <text x="260" y="84" fill="#10B981" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle" font-weight="bold">Notion CRM</text>
-
-    <!-- Email Node -->
-    <rect x="220" y="110" width="80" height="30" rx="6" fill="#090D16" stroke="#F43F5E" stroke-width="1"/>
-    <text x="260" y="128" fill="#F43F5E" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle" font-weight="600">Email Digest</text>
-  </g>
-</svg>
-
-<br/>
-
 [![Notion Enabled](https://img.shields.io/badge/Notion-Connected-black?style=for-the-badge&logo=notion&logoColor=white)](https://notion.so)
 [![Slack Alerts](https://img.shields.io/badge/Slack-Enabled-4A154B?style=for-the-badge&logo=slack&logoColor=white)](https://slack.com)
 [![SMTP Digest](https://img.shields.io/badge/SMTP-Active-ea4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:)
@@ -106,40 +19,37 @@ The **Autonomous Competitor Intelligence Engine** is a fully automated, self-con
 
 ## 🗺️ System Architecture & Workflow
 
-```
-                                  +-------------------+
-                                  |  Chrome Extension |
-                                  +---------+---------+
-                                            | (REST API + API Key)
-                                            v
-+------------------+     Check      +-------------------+
-|  Competitor List | -------------> | Sequential Queue  |
-+------------------+  (6h Schedule) +---------+---------+
-                                            |
-                                            v
-                                    [1. Scraper] (Axios/Cheerio fallback or Headless Puppeteer)
-                                            |
-                                            v
-                                    [2. Embedder] (all-MiniLM-L6-v2 ONNX)
-                                            |
-                                            v
-                                    [3. Semantic Diff] (Cosine similarity of page structures)
-                                            |
-                                            +--> If Change Detected:
-                                            |
-                                            v
-                                    [4. Local LLM / Gemini] (Threat analysis & recommendations)
-                                            |
-                                            v
-                                    [5. CRM Adapter] (Idempotent Notion or Airtable sync)
-                                            |
-                                            +--> If Fail: Enqueue in SQLite Queue
-                                            |
-                                            v
-                                    [6. Slack Notifications] (Immediate alert if Threat Score >= 8)
-                                            |
-                                            v
-                                    [7. Email Digest] (Daily/Weekly summary report)
+```mermaid
+graph TD
+    subgraph Input Sources
+        A[Chrome Extension] -->|One-Click API| B(Sequential Queue)
+        C[Scheduled Runner] -->|6h Interval| B
+    end
+
+    subgraph Core Pipeline
+        B --> D[1. Double-Engine Scraper]
+        D -->|Text Content| E[2. Local ONNX Embedder]
+        E -->|Semantic Cosine Compare| F{Change Detected?}
+        F -->|No| G[End Job]
+        F -->|Yes| H[3. Local CPU LLM / Gemini]
+    end
+
+    subgraph Integrations & Alerts
+        H --> I[CRM Adapter]
+        I -->|Idempotent Write| J[Notion Database]
+        I -->|Idempotent Write| K[Airtable Base]
+        I -->|On Sync Failure| L[SQLite Retry Queue]
+        H -->|Impact Score >= 8| M[Slack Webhook Channel]
+        H -->|Periodic Digest| N[SMTP Email Inbox]
+    end
+
+    style J fill:#000000,stroke:#333,stroke-width:2px,color:#fff
+    style M fill:#4A154B,stroke:#333,stroke-width:2px,color:#fff
+    style N fill:#EA4335,stroke:#333,stroke-width:2px,color:#fff
+    style B fill:#1E293B,stroke:#334155,stroke-width:1px,color:#fff
+    style D fill:#1E293B,stroke:#334155,stroke-width:1px,color:#fff
+    style E fill:#1E293B,stroke:#334155,stroke-width:1px,color:#fff
+    style H fill:#1E293B,stroke:#334155,stroke-width:1px,color:#fff
 ```
 
 ---
