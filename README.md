@@ -1,110 +1,128 @@
 <div align="center">
 
-<!-- Animated Typing SVG Header -->
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=28&duration=3000&pause=1000&color=6C63FF&center=true&vCenter=true&multiline=true&repeat=true&width=700&height=100&lines=%F0%9F%95%B5%EF%B8%8F+Autonomous+Competitor+Intelligence+Engine;Scrape+%E2%86%92+Detect+%E2%86%92+Classify+%E2%86%92+Alert+%F0%9F%9A%80" alt="Typing SVG" />
+<!-- Custom Capsule Render Header -->
+<img src="https://capsule-render.vercel.app/api?type=venom&color=0:0d1117,50:161b22,100:6C63FF&height=200&section=header&text=ACIE&fontSize=80&fontColor=6C63FF&animation=fadeIn&fontAlignY=35&desc=Autonomous%20Competitor%20Intelligence%20Engine&descSize=18&descAlignY=55&descColor=8b949e" width="100%" />
 
 <br/>
 
-<!-- Animated Wave Divider -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=header&animation=twinkling" width="100%" />
+<a href="#-the-ml-pipeline">
+<img src="https://img.shields.io/badge/⚡_Scrape-0d1117?style=for-the-badge" />
+</a>
+<img src="https://img.shields.io/badge/→-6C63FF?style=for-the-badge" />
+<a href="#-the-ml-pipeline">
+<img src="https://img.shields.io/badge/🧠_Detect-0d1117?style=for-the-badge" />
+</a>
+<img src="https://img.shields.io/badge/→-6C63FF?style=for-the-badge" />
+<a href="#-the-ml-pipeline">
+<img src="https://img.shields.io/badge/🏷️_Classify-0d1117?style=for-the-badge" />
+</a>
+<img src="https://img.shields.io/badge/→-6C63FF?style=for-the-badge" />
+<a href="#-the-ml-pipeline">
+<img src="https://img.shields.io/badge/📊_Score-0d1117?style=for-the-badge" />
+</a>
+<img src="https://img.shields.io/badge/→-6C63FF?style=for-the-badge" />
+<a href="#-multi-channel-alerting">
+<img src="https://img.shields.io/badge/🚨_Alert-0d1117?style=for-the-badge" />
+</a>
 
-<br/>
+<br/><br/>
 
-<!-- Animated Shield Badges -->
-[![Python](https://img.shields.io/badge/Python-Semantic_Engine-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a2e)](https://python.org)
-[![Node.js](https://img.shields.io/badge/Node.js-Backend_Server-339933?style=for-the-badge&logo=nodedotjs&logoColor=white&labelColor=1a1a2e)](https://nodejs.org)
-[![React](https://img.shields.io/badge/React-Dashboard_UI-61DAFB?style=for-the-badge&logo=react&logoColor=white&labelColor=1a1a2e)](https://react.dev)
-[![HuggingFace](https://img.shields.io/badge/🤗_HuggingFace-ML_Models-FFD21E?style=for-the-badge&labelColor=1a1a2e)](https://huggingface.co)
+<img src="https://img.shields.io/badge/python-3776AB?style=flat-square&logo=python&logoColor=white" />
+<img src="https://img.shields.io/badge/node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white" />
+<img src="https://img.shields.io/badge/react-61DAFB?style=flat-square&logo=react&logoColor=black" />
+<img src="https://img.shields.io/badge/sqlite-003B57?style=flat-square&logo=sqlite&logoColor=white" />
+<img src="https://img.shields.io/badge/puppeteer-40B5A4?style=flat-square&logo=puppeteer&logoColor=white" />
+<img src="https://img.shields.io/badge/huggingface-FFD21E?style=flat-square&logo=huggingface&logoColor=black" />
+<img src="https://img.shields.io/badge/docker-2496ED?style=flat-square&logo=docker&logoColor=white" />
+<img src="https://img.shields.io/badge/chrome_ext-4285F4?style=flat-square&logo=googlechrome&logoColor=white" />
 
-[![Notion](https://img.shields.io/badge/Notion-CRM_Sync-000000?style=for-the-badge&logo=notion&logoColor=white&labelColor=1a1a2e)](https://notion.so)
-[![Slack](https://img.shields.io/badge/Slack-Real_Time_Alerts-4A154B?style=for-the-badge&logo=slack&logoColor=white&labelColor=1a1a2e)](https://slack.com)
-[![Gmail](https://img.shields.io/badge/SMTP-Email_Digest-EA4335?style=for-the-badge&logo=gmail&logoColor=white&labelColor=1a1a2e)](mailto:)
-[![Chrome](https://img.shields.io/badge/Chrome-Extension-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1a1a2e)](https://developer.chrome.com)
+<br/><br/>
 
-<br/>
-
-<!-- Animated Stats Line -->
-<img src="https://img.shields.io/badge/RAM_Optimized-512MB_Limit-blueviolet?style=flat-square&logo=railway&logoColor=white" />
-<img src="https://img.shields.io/badge/Inference-CPU_Only-orange?style=flat-square&logo=cplusplus&logoColor=white" />
-<img src="https://img.shields.io/badge/Tests-All_Passing_✅-brightgreen?style=flat-square&logo=checkmarx&logoColor=white" />
-<img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" />
+[![Notion](https://img.shields.io/badge/Notion_CRM-000?style=for-the-badge&logo=notion&logoColor=fff)](https://notion.so)
+[![Slack](https://img.shields.io/badge/Slack_Alerts-4A154B?style=for-the-badge&logo=slack&logoColor=fff)](https://slack.com)
+[![Email](https://img.shields.io/badge/SMTP_Digest-EA4335?style=for-the-badge&logo=gmail&logoColor=fff)](mailto:)
+[![Tests](https://img.shields.io/badge/Tests-Passing_✅-brightgreen?style=for-the-badge)]()
+[![License](https://img.shields.io/badge/License-MIT-6C63FF?style=for-the-badge)]()
 
 </div>
 
 <br/>
 
-<!-- Gradient Divider -->
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
-
-## 🌟 What Is This?
-
-> **An autonomous, self-healing competitor monitoring engine** that scrapes competitor websites on a schedule, detects *meaningful* content changes using **Python ML sentence embeddings**, classifies them via **zero-shot deep learning**, scores business impact with **LLM inference**, and pushes real-time alerts to **Slack**, **Email**, and **Notion/Airtable CRM** — all within a **512MB RAM** footprint.
+> **A fully autonomous, self-healing competitor monitoring engine.** It scrapes competitor websites on a schedule, detects *meaningful* changes using **Python ML sentence embeddings** (not string diffs), classifies them via **zero-shot deep learning**, scores business impact with **LLM inference**, and pushes real-time intelligence to **Slack**, **Email**, and **Notion/Airtable** — all optimized for a **512MB RAM** environment.
 
 <br/>
-
-<div align="center">
-
-| 🔬 Scrape | 🧠 Detect | 🏷️ Classify | 📊 Score | 🚨 Alert |
-|:---:|:---:|:---:|:---:|:---:|
-| Axios + Puppeteer | Python Sentence-BERT | BART Zero-Shot NLI | Gemini / Qwen LLM | Slack + Email + CRM |
-| Double-engine static & JS rendering | `all-MiniLM-L6-v2` cosine similarity | `facebook/bart-large-mnli` | Impact scoring 1–10 | Real-time webhook push |
-
-</div>
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 🗺️ System Architecture
 
 ```mermaid
-graph TD
-    subgraph "🌐 Input Sources"
-        A["🧩 Chrome Extension"] -->|"One-Click API"| B("📋 Sequential Queue")
-        C["⏰ Scheduled Runner"] -->|"6h Interval"| B
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#6C63FF', 'primaryTextColor': '#c9d1d9', 'primaryBorderColor': '#6C63FF', 'lineColor': '#6C63FF', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117', 'fontSize': '14px'}}}%%
+
+graph LR
+    subgraph INPUT["📥 Input Layer"]
+        direction TB
+        EXT["🧩 Chrome Extension"]
+        CRON["⏰ Cron Scheduler"]
     end
 
-    subgraph "⚙️ Core ML Pipeline"
-        B --> D["🕸️ Double-Engine Scraper"]
-        D -->|"Cleaned Text"| E["🐍 Python Sentence-BERT Embedder"]
-        E -->|"Cosine Similarity"| F{"🔍 Semantic Change?"}
-        F -->|"similarity >= 0.85"| G["✅ No Action"]
-        F -->|"similarity < 0.85"| H["🏷️ Python BART Zero-Shot Classifier"]
-        H --> I["🧠 Gemini / Qwen LLM Scorer"]
+    subgraph PIPELINE["⚙️ ML Processing Pipeline"]
+        direction TB
+        SCRAPE["🕸️ Double-Engine Scraper<br/><i>Axios + Cheerio | Puppeteer</i>"]
+        EMBED["🐍 Semantic Embedder<br/><i>Python • all-MiniLM-L6-v2</i>"]
+        GATE{{"🔍 Cosine Sim < 0.85?"}}
+        CLASS["🏷️ Zero-Shot Classifier<br/><i>Python • BART-large-MNLI</i>"]
+        LLM["🧠 LLM Impact Scorer<br/><i>Gemini 2.5 Flash | Qwen GGUF</i>"]
     end
 
-    subgraph "📡 Integrations & Alerts"
-        I --> J["🔄 CRM Adapter"]
-        J -->|"Idempotent Write"| K["📓 Notion Database"]
-        J -->|"Idempotent Write"| L["📊 Airtable Base"]
-        J -->|"On Failure"| M["💾 SQLite Retry Queue"]
-        I -->|"Impact >= 8"| N["💬 Slack Channel"]
-        I -->|"Daily Digest"| O["📧 SMTP Email"]
+    subgraph OUTPUT["📡 Output Layer"]
+        direction TB
+        NOTION["📓 Notion"]
+        SLACK["💬 Slack"]
+        EMAIL["📧 Email"]
+        AIRTABLE["📊 Airtable"]
     end
 
-    style K fill:#000000,stroke:#6C63FF,stroke-width:2px,color:#fff
-    style N fill:#4A154B,stroke:#6C63FF,stroke-width:2px,color:#fff
-    style O fill:#EA4335,stroke:#6C63FF,stroke-width:2px,color:#fff
-    style B fill:#0d1117,stroke:#6C63FF,stroke-width:1px,color:#c9d1d9
-    style D fill:#0d1117,stroke:#6C63FF,stroke-width:1px,color:#c9d1d9
-    style E fill:#0d1117,stroke:#3776AB,stroke-width:2px,color:#58a6ff
-    style H fill:#0d1117,stroke:#FFD21E,stroke-width:2px,color:#FFD21E
-    style I fill:#0d1117,stroke:#6C63FF,stroke-width:1px,color:#c9d1d9
-    style F fill:#161b22,stroke:#6C63FF,stroke-width:2px,color:#c9d1d9
+    EXT --> SCRAPE
+    CRON --> SCRAPE
+    SCRAPE --> EMBED
+    EMBED --> GATE
+    GATE -->|"No Change"| SKIP["✅ Skip"]
+    GATE -->|"Changed!"| CLASS
+    CLASS --> LLM
+    LLM --> NOTION
+    LLM --> SLACK
+    LLM --> EMAIL
+    LLM --> AIRTABLE
+
+    style GATE fill:#161b22,stroke:#FFD21E,stroke-width:2px,color:#FFD21E
+    style SCRAPE fill:#0d1117,stroke:#6C63FF,stroke-width:1px,color:#c9d1d9
+    style EMBED fill:#0d1117,stroke:#3776AB,stroke-width:2px,color:#58a6ff
+    style CLASS fill:#0d1117,stroke:#FFD21E,stroke-width:2px,color:#FFD21E
+    style LLM fill:#0d1117,stroke:#6C63FF,stroke-width:2px,color:#c9d1d9
+    style NOTION fill:#000,stroke:#fff,stroke-width:1px,color:#fff
+    style SLACK fill:#4A154B,stroke:#fff,stroke-width:1px,color:#fff
+    style EMAIL fill:#EA4335,stroke:#fff,stroke-width:1px,color:#fff
+    style SKIP fill:#161b22,stroke:#3fb950,stroke-width:1px,color:#3fb950
 ```
 
 <br/>
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+## 🧬 The ML Pipeline
 
-## 🧬 The ML Pipeline — Deep Dive
+This project uses **three distinct ML stages** — all running on **Python** and **local CPU** — to go from raw HTML to actionable business intelligence.
+
+---
+
+### `STAGE 1` — Semantic Change Detection
 
 <table>
 <tr>
-<td width="50%">
+<td>
 
-### 🐍 Stage 1 — Semantic Change Detection
-**Python** • `sentence-transformers` • `all-MiniLM-L6-v2`
+**🐍 Python** &nbsp;•&nbsp; `sentence-transformers` &nbsp;•&nbsp; `all-MiniLM-L6-v2`
+
+The assignment requires: ***"Don't use string comparison."***
+
+We convert scraped text into **384-dimensional embedding vectors** and compute **cosine similarity**. Two pages with the same *meaning* but different *wording* won't trigger false alerts.
 
 ```python
 from sentence_transformers import SentenceTransformer
@@ -112,22 +130,36 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-old_embedding = model.encode("Price is $100")
-new_embedding = model.encode("Current Price: $100")
+old = model.encode("Price is $100")
+new = model.encode("Current Price: $100")
 
-similarity = cosine_similarity(
-    [old_embedding], [new_embedding]
-)[0][0]
-# → 0.93 — Same meaning, NO alert! ✅
+sim = cosine_similarity([old], [new])[0][0]
+# → 0.93 — Same meaning. No alert triggered.
 ```
 
-> ❌ **No string comparison** — the system understands *meaning*, not characters.
+| Scenario | Similarity | Alert? |
+|:---|:---:|:---:|
+| `"Price is $100"` → `"Current Price: $100"` | 0.93 | ❌ No |
+| `"Price is $100"` → `"Price is $70"` | 0.61 | ✅ Yes |
+| `"We build CRM tools"` → `"We're hiring 50 engineers"` | 0.40 | ✅ Yes |
 
 </td>
-<td width="50%">
+</tr>
+</table>
 
-### 🏷️ Stage 2 — Zero-Shot Change Classification
-**Python** • `transformers` • `facebook/bart-large-mnli`
+---
+
+### `STAGE 2` — Zero-Shot Change Classification
+
+<table>
+<tr>
+<td>
+
+**🐍 Python** &nbsp;•&nbsp; `transformers` &nbsp;•&nbsp; `facebook/bart-large-mnli`
+
+The assignment requires: ***"Don't use rule-based classification. Use ML model."***
+
+We use **Natural Language Inference (NLI)** to classify changes into categories — no `if "price" in text:` rules anywhere.
 
 ```python
 from transformers import pipeline
@@ -138,358 +170,274 @@ classifier = pipeline(
 )
 
 result = classifier(
-    "We launched GPT Vision.",
+    "We launched GPT Vision for all enterprise users.",
     candidate_labels=[
-        "Pricing Change", "Feature Update",
-        "Hiring Signal", "Content Shift",
-        "Leadership Change", "Other"
+        "Pricing Change",
+        "Feature Update",
+        "Hiring Signal",
+        "Content Shift",
+        "Leadership Change",
+        "Other"
     ]
 )
-# → "Feature Update" (0.87 confidence) 🎯
+# → { "labels": ["Feature Update", ...], "scores": [0.87, ...] }
 ```
 
-> ❌ **No rule-based `if "price":`** — uses deep learning NLI.
+| Input Text | Predicted Category | Confidence |
+|:---|:---|:---:|
+| *"We launched GPT Vision"* | Feature Update | 87% |
+| *"Plans now start at $49/mo"* | Pricing Change | 91% |
+| *"Hiring 200 engineers in AI"* | Hiring Signal | 84% |
+| *"New CEO appointed from Google"* | Leadership Change | 89% |
 
 </td>
 </tr>
 </table>
 
-### 🧠 Stage 3 — LLM Impact Analysis & Scoring
+---
 
-The classified change is fed to either **Google Gemini 2.5 Flash** (cloud) or a **local Qwen2.5-0.5B GGUF** model (CPU). The LLM generates:
+### `STAGE 3` — LLM Impact Analysis
 
-| Output | Description |
+<table>
+<tr>
+<td>
+
+**🧠 Gemini 2.5 Flash** (cloud) &nbsp;or&nbsp; **Qwen2.5-0.5B** (local CPU)
+
+The LLM receives the detected change + your business profile and generates a structured intelligence card:
+
+| Field | Description |
 |:---|:---|
-| 📂 **Category** | Overridden by BART zero-shot classifier output |
-| 📝 **Summary** | One-paragraph plain-English summary of what changed |
-| ❓ **Why It Matters** | Business impact analysis relative to *your* company profile |
-| 📊 **Impact Score** | Integer 1–10 threat/opportunity rating |
-| 📋 **Justification** | Evidence-based reasoning for the score |
-| 🎯 **Recommendation** | Specific action item with timeline |
+| 📂 Category | Overridden by BART zero-shot output |
+| 📝 Summary | What changed, in plain English |
+| ❓ Why It Matters | Impact analysis relative to *your* business |
+| 📊 Impact Score | 1–10 threat/opportunity rating |
+| 📋 Justification | Evidence-based reasoning |
+| 🎯 Recommendation | Action item with timeline |
+
+> The local Qwen model runs as an **isolated subprocess** via `llama-cli` — memory is instantly reclaimed by the OS after inference, preventing Node.js heap leaks.
+
+</td>
+</tr>
+</table>
 
 <br/>
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
-
-## ⚡ Core Feature Modules
+## ⚡ Feature Modules
 
 <details open>
-<summary><b>🕸️ 1. Intelligent Double-Engine Scraper</b></summary>
-<br/>
+<summary><h3>🕸️ Double-Engine Web Scraper</h3></summary>
 
-| Engine | Library | Purpose |
+| Engine | Stack | When Used |
 |:---|:---|:---|
-| ⚡ Fast Fetch | `axios` + `cheerio` | Static HTML pages — fast and lightweight |
-| 🌐 JS Render | `puppeteer` (headless Chromium) | SPAs, React/Angular apps with dynamic content |
+| **Fast Fetch** | `axios` + `cheerio` | Static HTML pages |
+| **JS Renderer** | `puppeteer` (headless Chromium) | SPAs, React/Angular apps |
 
-**Smart Cleaning Pipeline:**
-- 🧹 Strips cookie banners, navigation bars, footers, sidebars
-- 🔄 Rotates User-Agent strings to avoid bot detection
-- 🖼️ Blocks images/CSS in Puppeteer to minimize memory footprint
-- 📸 Captures visual screenshots for audit trails
-
-</details>
-
-<details>
-<summary><b>🔍 2. Tech Stack & DNS Enrichment</b></summary>
-<br/>
-
-- 🌐 **DNS Resolution** — A-records and MX-records for server & email hosting detection
-- 🔧 **Header Inspection** — Reads `server`, `x-powered-by`, `x-generator` HTTP headers
-- 📊 **Dashboard Widget** — Shows enriched tech profiles directly in the competitor sidebar
+**Anti-noise pipeline:**
+- Strips cookie banners, nav bars, footers, sidebars before comparison
+- Rotates User-Agent strings to avoid bot detection
+- Blocks images/CSS in Puppeteer to minimize RAM
+- Saves visual screenshots for audit trails
 
 </details>
 
 <details>
-<summary><b>💼 3. Idempotent CRM Sync & Fail-Safe Queue</b></summary>
-<br/>
+<summary><h3>🔍 Tech Stack & DNS Enrichment</h3></summary>
 
-- 🔒 **Deduplication** — Queries Notion/Airtable before writes to prevent duplicates
-- 🔄 **SQLite Retry Queue** — Failed syncs are queued locally and auto-retried periodically
-- 📊 **Dynamic Schema Matching** — Case-insensitive, whitespace-tolerant property matching
-- ✅ **Status Tracking** — Each card tracks `synced`, `failed`, or `pending` state
+- **DNS Resolution** — A and MX record lookups for server & email hosting
+- **Header Inspection** — `server`, `x-powered-by`, `x-generator` headers mapped
+- **Dashboard Widget** — Enriched tech profiles shown in competitor sidebar
 
 </details>
 
 <details>
-<summary><b>📢 4. Multi-Channel Alert System</b></summary>
-<br/>
+<summary><h3>💼 Idempotent CRM Sync</h3></summary>
 
-| Channel | Trigger | Content |
+- **Deduplication** — Queries CRM before every write to prevent duplicates
+- **Retry Queue** — Failed syncs stored in SQLite, auto-retried on schedule
+- **Dynamic Schema Matching** — Case-insensitive, whitespace-tolerant property resolution
+- **Status Tracking** — Each card is `synced`, `failed`, or `pending`
+
+</details>
+
+<details>
+<summary><h3>📢 Multi-Channel Alerting</h3></summary>
+
+| Channel | Trigger | Format |
 |:---|:---|:---|
-| 💬 **Slack** | Impact Score ≥ 8 | Immediate webhook with full intelligence card |
-| 📧 **Email** | Periodic digest schedule | HTML-formatted summary of all recent changes |
-| 📓 **Notion** | Every detected change | Structured database row with all fields |
-| 📊 **Airtable** | Every detected change | Structured record with all fields |
+| 💬 Slack | Impact ≥ 8 | Immediate webhook with full card |
+| 📧 Email | Periodic schedule | HTML digest of all recent changes |
+| 📓 Notion | Every change | Structured database row |
+| 📊 Airtable | Every change | Structured record |
 
 </details>
 
 <details>
-<summary><b>🧩 5. Chrome Extension — One-Click Registration</b></summary>
-<br/>
+<summary><h3>🧩 Chrome Extension</h3></summary>
 
-- 🖱️ Browse any competitor website → Click extension icon → **Instantly registered**
-- 🔑 Secured via API key authentication
-- 🔗 Connects to your running server instance
-- ⚡ Zero-friction competitor onboarding workflow
+- Browse any competitor site → Click extension → **Registered in one click**
+- API key authentication for security
+- Manifest V3, service worker architecture
 
 </details>
 
 <br/>
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+## 🤖 Model Specs
 
-## 🤖 ML Model Configurations
-
-<div align="center">
-
-| Component | Model | Format | Size | RAM | Speed |
-|:---|:---|:---|:---|:---|:---|
-| 🔍 **Semantic Embeddings** | `all-MiniLM-L6-v2` | ONNX / PyTorch | ~90 MB | ~80 MB | < 0.5s |
-| 🏷️ **Zero-Shot Classifier** | `facebook/bart-large-mnli` | PyTorch | ~1.6 GB | ~1.2 GB | ~6s |
-| 🧠 **LLM (Cloud)** | `gemini-2.5-flash` | API | 0 MB | 0 MB | < 1.5s |
-| 🧠 **LLM (Local)** | `Qwen2.5-0.5B-Instruct` | GGUF Q4_K_M | ~382 MB | ~350 MB | 7–15s |
-
-</div>
-
-> 💡 **Tip:** Set `GEMINI_API_KEY` in `.env` for cloud inference. Without it, the engine falls back to the local Qwen GGUF model automatically.
+| Component | Model | Format | Disk | RAM | Latency |
+|:---|:---|:---|---:|---:|:---|
+| Semantic Embeddings | `all-MiniLM-L6-v2` | ONNX / PyTorch | 90 MB | ~80 MB | < 0.5s |
+| Zero-Shot Classifier | `facebook/bart-large-mnli` | PyTorch | 1.6 GB | ~1.2 GB | ~6s |
+| LLM — Cloud | `gemini-2.5-flash` | API | — | — | < 1.5s |
+| LLM — Local | `Qwen2.5-0.5B-Instruct` | GGUF Q4_K_M | 382 MB | ~350 MB | 7–15s |
 
 <br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
-```
-✅ Node.js    v18+
-✅ Python     3.9+
-✅ NPM        v10+
-✅ OS         macOS / Linux / Windows (WSL)
-```
-
-### 1️⃣ Clone & Install
-
 ```bash
-# Clone the repository
+# 1. Clone
 git clone https://github.com/NitheshK4/Autonomous-Competitor-Intelligence-Engine.git
 cd Autonomous-Competitor-Intelligence-Engine
 
-# Install Node.js dependencies (root, server, client)
-npm install
-npm run install:all
-
-# Install Python ML dependencies
+# 2. Install dependencies
+npm install && npm run install:all
 pip install sentence-transformers transformers torch
-```
 
-### 2️⃣ Configure Environment
-
-Create a `.env` file in the project root:
-
-```env
+# 3. Configure environment
+cat > .env << EOF
 PORT=3000
 NODE_ENV=development
+GEMINI_API_KEY=your_key_here          # optional — enables cloud LLM
+SLACK_WEBHOOK_URL=your_webhook_here   # optional — enables Slack alerts
+EOF
 
-# Optional: Cloud LLM inference (recommended)
-GEMINI_API_KEY=AIzaSyCC...
-
-# Optional: Slack real-time alerts
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
-```
-
-### 3️⃣ Launch Development Servers
-
-```bash
+# 4. Launch
 npm run dev
-```
 
-> 🖥️ **Backend** → `http://localhost:3000`
-> 🎨 **Dashboard** → `http://localhost:5173`
-
-### 4️⃣ Run Integration Tests
-
-```bash
+# 5. Verify everything works
 npm test
 ```
 
-Validates: Scraping → Semantic Detection → LLM Inference → Zero-Shot Classification → CRM Sync
+> **Backend** → `http://localhost:3000` &nbsp;&nbsp;|&nbsp;&nbsp; **Dashboard** → `http://localhost:5173`
 
 <br/>
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
-
-## 🔌 Integration Setup Guides
+## 🔌 Integration Guides
 
 <details>
-<summary><b>📓 Notion CRM Configuration</b></summary>
+<summary><b>📓 Notion CRM</b></summary>
 <br/>
 
-1. Create an integration at **[Notion My Integrations](https://www.notion.so/my-integrations)**
-2. Create a Database with these properties:
-
-| Property | Type |
-|:---|:---|
-| Title | `Title` (default) |
-| Competitor Name | `Select` |
-| URL | `URL` |
-| Category | `Select` |
-| Impact Score | `Number` |
-| Recommended Action | `Text` |
-| Summary | `Text` |
-| Justification | `Text` |
-| Screenshot URL | `URL` |
-
-3. Connect your integration to the database via the `...` menu → **Connect to**
-4. Extract your **Database ID** from the page URL
-5. Enter credentials in the dashboard **Settings** panel
+1. Create integration at [notion.so/my-integrations](https://www.notion.so/my-integrations)
+2. Create database with properties: `Title`, `Competitor Name` (Select), `URL` (URL), `Category` (Select), `Impact Score` (Number), `Recommended Action` (Text), `Summary` (Text), `Justification` (Text), `Screenshot URL` (URL)
+3. Connect integration to database via `...` menu → **Connect to**
+4. Extract Database ID from the page URL
+5. Enter token + DB ID in dashboard Settings
 
 </details>
 
 <details>
-<summary><b>📊 Airtable CRM Configuration</b></summary>
+<summary><b>📊 Airtable</b></summary>
 <br/>
 
-1. Generate a PAT with `data.records:write` at **[Airtable Developer Hub](https://airtable.com/create/tokens)**
-2. Create a Base → Table named **Competitor Intel** with matching fields
+1. Generate PAT with `data.records:write` at [airtable.com/create/tokens](https://airtable.com/create/tokens)
+2. Create Base → Table **Competitor Intel** with matching fields
 3. Enter Base ID, Table name, and Token in dashboard Settings
 
 </details>
 
 <details>
-<summary><b>🧩 Chrome Extension Setup</b></summary>
+<summary><b>💬 Slack</b></summary>
 <br/>
 
-1. Navigate to `chrome://extensions/`
-2. Enable **Developer mode** → Click **Load unpacked**
-3. Select the `extension/` directory from this project
-4. Configure server URL and API key in extension settings
-5. Browse any site → Click extension → **Competitor registered!** 🎉
+1. Create an Incoming Webhook in Slack workspace settings
+2. Paste webhook URL in dashboard Settings
+3. Impact ≥ 8 triggers instant alert
 
 </details>
 
 <details>
-<summary><b>💬 Slack Alerts</b></summary>
+<summary><b>📧 SMTP Email</b></summary>
 <br/>
 
-1. Create an **Incoming Webhook** in your Slack workspace
-2. Paste the webhook URL in dashboard Settings
-3. Changes with **Impact Score ≥ 8** trigger instant Slack alerts! ⚡
+1. For Gmail: generate App Password at `security.google.com`
+2. Configure: host `smtp.gmail.com`, port `587`, email, app password, recipient
+3. Test connection in Settings → periodic digests will arrive automatically
 
 </details>
 
 <details>
-<summary><b>📧 SMTP Email Digest</b></summary>
+<summary><b>🧩 Chrome Extension</b></summary>
 <br/>
 
-1. For Gmail: Generate an **App Password** at `security.google.com`
-2. Configure in Settings: Host `smtp.gmail.com`, Port `587`
-3. Click **Test SMTP Connection** to verify
-4. Periodic digests will arrive in your inbox automatically 📬
+1. Go to `chrome://extensions/` → enable Developer Mode
+2. Click **Load unpacked** → select `extension/` directory
+3. Configure server URL and API key in extension popup
+4. Browse any site → click extension → done
 
 </details>
 
 <br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
-
-## 🐳 Deploy on Railway
-
-```bash
-# Railway reads the Dockerfile and handles everything:
-# ✅ Chrome installation for Puppeteer
-# ✅ Model binary downloads
-# ✅ Vite static build
-# ✅ Express server routing
-```
-
-1. Create a **New Project** on [Railway](https://railway.app)
-2. Link your GitHub repository
-3. Add environment variable: `PORT=3000`
-4. Deploy! 🚀
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
-
-## 🛠️ Tech Stack
-
-<div align="center">
-
-<img src="https://skillicons.dev/icons?i=python,nodejs,react,vite,sqlite,docker,html,css,js&theme=dark" alt="Tech Stack" />
-
-</div>
-
-<br/>
-
-| Layer | Technologies |
-|:---|:---|
-| 🐍 **ML Engine** | Python, sentence-transformers, HuggingFace Transformers, PyTorch |
-| 🖥️ **Backend** | Node.js, Express, better-sqlite3, node-cron |
-| 🎨 **Frontend** | React, Vite, Recharts, React Router |
-| 🕸️ **Scraping** | Axios, Cheerio, Puppeteer (headless Chromium) |
-| 🧠 **AI/LLM** | Gemini 2.5 Flash, Qwen2.5-0.5B GGUF, BART-large-MNLI |
-| 🔌 **Integrations** | Notion API, Airtable API, Slack Webhooks, Nodemailer SMTP |
-| 🧩 **Extension** | Chrome Manifest V3, Background Service Workers |
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 📁 Project Structure
 
 ```
-📦 Autonomous-Competitor-Intelligence-Engine
-├── 📂 client/                    # React + Vite frontend dashboard
-│   ├── 📂 src/
-│   │   ├── 📂 components/        # Dashboard, Settings, Cards UI
-│   │   ├── 📂 pages/             # Route pages
-│   │   └── App.jsx               # Root application
-│   └── vite.config.js
-├── 📂 server/                    # Node.js + Express backend
-│   └── 📂 src/
-│       ├── scraper.js            # Double-engine web scraper
-│       ├── detector.js           # Semantic change detection orchestrator
-│       ├── semantic_detector.py  # 🐍 Python sentence-BERT embeddings
-│       ├── zero_shot_classifier.py # 🐍 Python BART zero-shot classifier
-│       ├── llm.js                # LLM inference (Gemini / Qwen GGUF)
-│       ├── crm.js                # Notion & Airtable CRM adapter
-│       ├── queue.js              # Sequential processing queue
-│       ├── slack.js              # Slack webhook alerts
-│       ├── email.js              # SMTP email digest
-│       └── db.js                 # SQLite database layer
-├── 📂 extension/                 # Chrome Extension (Manifest V3)
-├── analytics.py                  # 🐍 CLI analytics dashboard & reports
-├── Dockerfile                    # Production container config
-├── package.json                  # Root workspace orchestrator
-└── README.md                     # ← You are here! 📍
+├── client/                         # React + Vite dashboard
+│   └── src/
+│       ├── components/             # UI components
+│       ├── pages/                  # Route pages
+│       └── App.jsx
+├── server/                         # Express backend
+│   └── src/
+│       ├── scraper.js              # Axios + Puppeteer scraper
+│       ├── detector.js             # Change detection orchestrator
+│       ├── semantic_detector.py    # Python: sentence-BERT embeddings
+│       ├── zero_shot_classifier.py # Python: BART zero-shot NLI
+│       ├── llm.js                  # Gemini / Qwen GGUF inference
+│       ├── crm.js                  # Notion + Airtable adapter
+│       ├── queue.js                # Sequential job queue
+│       ├── slack.js                # Slack webhooks
+│       ├── email.js                # SMTP digest
+│       ├── enrichment.js           # DNS + header enrichment
+│       └── db.js                   # SQLite layer
+├── extension/                      # Chrome Extension (MV3)
+├── analytics.py                    # CLI report generator
+├── Dockerfile                      # Production container
+└── package.json
 ```
 
 <br/>
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+## 🐳 Deploy to Railway
 
-## ⚠️ Known Limitations
-
-| Issue | Details |
-|:---|:---|
-| ⏳ **Cold Start** | First run downloads ML models (~1.6GB for BART, ~382MB for Qwen). Subsequent runs use cache. |
-| 🤖 **Anti-Bot** | Some sites block headless scrapers. The engine falls back to Axios gracefully. |
-| 📋 **Sequential Queue** | Competitors are processed one-at-a-time to stay under 512MB RAM. |
-| 🏷️ **Classifier Latency** | BART zero-shot takes ~6s per classification on CPU. Cached after first load. |
+1. Create project on [railway.app](https://railway.app)
+2. Link GitHub repo
+3. Set `PORT=3000` environment variable
+4. Deploy — Railway reads the `Dockerfile`, installs Chrome for Puppeteer, downloads model binaries, builds the Vite client, and serves Express
 
 <br/>
 
-<!-- Animated Footer Wave -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer&animation=twinkling" width="100%" />
+## ⚠️ Limitations
+
+| | Details |
+|:---|:---|
+| ⏳ Cold Start | First run downloads ~2GB of ML model weights. Cached after that. |
+| 🤖 Anti-Bot | Some sites block headless scrapers. Falls back to Axios. |
+| 📋 Sequential | Jobs queued one-at-a-time to stay under 512MB RAM. |
+| 🏷️ Classifier | BART zero-shot takes ~6s per classification on CPU. |
+
+<br/>
+
+---
 
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=18&duration=2000&pause=1500&color=6C63FF&center=true&vCenter=true&repeat=true&width=500&height=30&lines=Built+with+%E2%9D%A4%EF%B8%8F+by+Nithesh+Kumar;Star+%E2%AD%90+this+repo+if+it+helped+you!" alt="Footer Typing" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:161b22,100:6C63FF&height=100&section=footer&animation=fadeIn" width="100%" />
 
-<br/><br/>
+<br/>
 
-[![MIT License](https://img.shields.io/badge/License-MIT-6C63FF?style=for-the-badge&labelColor=0d1117)](LICENSE)
+<sub>Open source under MIT License</sub>
 
 </div>
