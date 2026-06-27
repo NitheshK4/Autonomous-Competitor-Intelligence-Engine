@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const { env, pipeline } = require('@huggingface/transformers');
+const { spawn } = require('child_process');
 
 const CACHE_DIR = path.join(__dirname, '..', 'cache');
 env.cacheDir = CACHE_DIR;
@@ -95,12 +96,53 @@ function getChunks(text) {
 }
 
 /**
- * Compare two text versions semantically chunk-by-chunk.
- * Returns { hasChanged, similarity, diffText, changesSummary }
+ * Call the Python semantic change detection script as a subprocess.
  */
-async function detectChanges(oldText, newText, threshold = 0.85) {
+async function detectChangesPython(oldText, newText, threshold = 0.85) {
+  return new Promise((resolve, reject) => {
+    const pythonScript = path.join(__dirname, 'semantic_detector.py');
+    // Spawn Python3 process
+    const child = spawn('python3', [pythonScript]);
+
+    let stdoutData = '';
+    let stderrData = '';
+
+    child.stdout.on('data', (data) => {
+      stdoutData += data.toString();
+    });
+
+    child.stderr.on('data', (data) => {
+      stderrData += data.toString();
+    });
+
+    child.on('close', (code) => {
+      if (code !== 0) {
+        return reject(new Error(`Python process exited with code ${code}. Stderr: ${stderrData}`));
+      }
+      try {
+        const result = JSON.parse(stdoutData.trim());
+        if (result.error) {
+          return reject(new Error(result.error));
+        }
+        resolve(result);
+      } catch (err) {
+        reject(new Error(`Failed to parse Python stdout: ${stdoutData}. Error: ${err.message}`));
+      }
+    });
+
+    // Write input variables to standard input of the Python script
+    const input = JSON.stringify({ old_text: oldText, new_text: newText, threshold });
+    child.stdin.write(input);
+    child.stdin.end();
+  });
+}
+
+/**
+ * Compare two text versions semantically chunk-by-chunk using pure JavaScript.
+ * (Saved as a robust local fallback engine).
+ */
+async function detectChangesJS(oldText, newText, threshold = 0.85) {
   if (!oldText) {
-    // Brand new competitor, treat all chunks as new
     const newChunks = getChunks(newText);
     return {
       hasChanged: newChunks.length > 0,
@@ -118,7 +160,6 @@ async function detectChanges(oldText, newText, threshold = 0.85) {
     return { hasChanged: false, similarity: 1.0, diffText: '', addedChunks: [], removedChunks: [] };
   }
 
-  // If one of them is empty, it's a massive change
   if (oldChunks.length === 0 || newChunks.length === 0) {
     return {
       hasChanged: true,
@@ -129,7 +170,6 @@ async function detectChanges(oldText, newText, threshold = 0.85) {
     };
   }
 
-  // Embed all chunks
   const oldEmbeddings = await Promise.all(oldChunks.map(async c => ({ text: c, vector: await getEmbedding(c) })));
   const newEmbeddings = await Promise.all(newChunks.map(async c => ({ text: c, vector: await getEmbedding(c) })));
 
@@ -137,7 +177,6 @@ async function detectChanges(oldText, newText, threshold = 0.85) {
   const matchedOldIndices = new Set();
   const diffLines = [];
 
-  // Find added or significantly changed paragraphs
   for (const newChunk of newEmbeddings) {
     let bestMatchScore = -1;
     let bestMatchIndex = -1;
@@ -150,7 +189,6 @@ async function detectChanges(oldText, newText, threshold = 0.85) {
       }
     }
 
-    // If similarity is below the threshold, this is a new/modified chunk
     if (bestMatchScore < threshold) {
       addedChunks.push(newChunk.text);
       diffLines.push(`+ ${newChunk.text}`);
@@ -159,7 +197,6 @@ async function detectChanges(oldText, newText, threshold = 0.85) {
     }
   }
 
-  // Find deleted paragraphs
   const removedChunks = [];
   for (let i = 0; i < oldEmbeddings.length; i++) {
     if (!matchedOldIndices.has(i)) {
@@ -168,7 +205,6 @@ async function detectChanges(oldText, newText, threshold = 0.85) {
     }
   }
 
-  // Calculate overall page similarity using average of best matches
   let totalMatchScore = 0;
   let matchCount = 0;
   
@@ -192,6 +228,21 @@ async function detectChanges(oldText, newText, threshold = 0.85) {
     addedChunks,
     removedChunks
   };
+}
+
+/**
+ * Compare two text versions semantically chunk-by-chunk.
+ * Primary: Python sentence-transformers script.
+ * Fallback: Local JS-ONNX transformers pipeline.
+ */
+async function detectChanges(oldText, newText, threshold = 0.85) {
+  try {
+    // Attempt Python sentence-transformers first (primary assignment engine)
+    return await detectChangesPython(oldText, newText, threshold);
+  } catch (err) {
+    console.warn(`Python semantic detector failed, falling back to local JS embedder:`, err.message);
+    return await detectChangesJS(oldText, newText, threshold);
+  }
 }
 
 module.exports = {

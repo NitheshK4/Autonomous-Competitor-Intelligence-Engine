@@ -194,6 +194,45 @@ function extractTag(text, tag) {
   return match ? match[1].trim() : '';
 }
 
+/**
+ * Call the Python Zero-Shot classification script as a subprocess.
+ */
+async function classifyChangeZeroShot(text) {
+  return new Promise((resolve, reject) => {
+    const pythonScript = path.join(__dirname, 'zero_shot_classifier.py');
+    const child = spawn('python3', [pythonScript]);
+
+    let stdoutData = '';
+    let stderrData = '';
+
+    child.stdout.on('data', (data) => {
+      stdoutData += data.toString();
+    });
+
+    child.stderr.on('data', (data) => {
+      stderrData += data.toString();
+    });
+
+    child.on('close', (code) => {
+      if (code !== 0) {
+        return reject(new Error(`Zero-shot classifier process exited with code ${code}. Stderr: ${stderrData}`));
+      }
+      try {
+        const result = JSON.parse(stdoutData.trim());
+        if (result.error) {
+          return reject(new Error(result.error));
+        }
+        resolve(result.category.toLowerCase().trim());
+      } catch (err) {
+        reject(new Error(`Failed to parse Zero-shot classifier stdout: ${stdoutData}. Error: ${err.message}`));
+      }
+    });
+
+    child.stdin.write(JSON.stringify({ text }));
+    child.stdin.end();
+  });
+}
+
 // Main analysis runner
 async function analyzeChange(diffText, businessProfile) {
   const geminiApiKey = process.env.GEMINI_API_KEY;
@@ -254,15 +293,33 @@ Analyze the competitor's changes above and generate the classified intelligence 
       const parsedScore = parseInt(scoreText.match(/\d+/)?.[0] || '1', 10);
       const impact_score = Math.min(Math.max(parsedScore, 1), 10);
 
-      const validCategories = [
-        'pricing change',
-        'product or feature update',
-        'hiring signal',
-        'content or messaging shift',
-        'leadership or company change',
-        'other'
-      ];
-      const finalCategory = validCategories.includes(category) ? category : 'other';
+      // Run Python zero-shot classification as required by the assignment
+      let finalCategory = 'other';
+      try {
+        const summaryForClassification = summary || diffText;
+        const zeroShotCat = await classifyChangeZeroShot(summaryForClassification);
+        
+        const categoryMapping = {
+          'pricing change': 'pricing change',
+          'feature update': 'product or feature update',
+          'hiring signal': 'hiring signal',
+          'content shift': 'content or messaging shift',
+          'leadership change': 'leadership or company change',
+          'other': 'other'
+        };
+        finalCategory = categoryMapping[zeroShotCat] || 'other';
+      } catch (e) {
+        console.warn('Zero-shot classifier failed, falling back to LLM tag category:', e.message);
+        const validCategories = [
+          'pricing change',
+          'product or feature update',
+          'hiring signal',
+          'content or messaging shift',
+          'leadership or company change',
+          'other'
+        ];
+        finalCategory = validCategories.includes(category) ? category : 'other';
+      }
 
       return {
         category: finalCategory,
@@ -351,7 +408,7 @@ ${userPrompt}<|im_end|>
       stderr += data.toString();
     });
 
-    child.on('close', (code) => {
+    child.on('close', async (code) => {
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(`llama-cli process exited with code ${code} in ${duration}s`);
       
@@ -375,18 +432,35 @@ ${userPrompt}<|im_end|>
       const parsedScore = parseInt(scoreText.match(/\d+/)?.[0] || '1', 10);
       const impact_score = Math.min(Math.max(parsedScore, 1), 10);
 
-      // Validate category mapping
-      const validCategories = [
-        'pricing change',
-        'product or feature update',
-        'hiring signal',
-        'content or messaging shift',
-        'leadership or company change',
-        'other'
-      ];
-      const finalCategory = validCategories.includes(category) ? category : 'other';
-
       const fullSummary = `${summary}\n\nWhy it matters: ${whyItMatters}`;
+
+      // Run Python zero-shot classification as required by the assignment
+      let finalCategory = 'other';
+      try {
+        const summaryForClassification = summary || diffText;
+        const zeroShotCat = await classifyChangeZeroShot(summaryForClassification);
+        
+        const categoryMapping = {
+          'pricing change': 'pricing change',
+          'feature update': 'product or feature update',
+          'hiring signal': 'hiring signal',
+          'content shift': 'content or messaging shift',
+          'leadership change': 'leadership or company change',
+          'other': 'other'
+        };
+        finalCategory = categoryMapping[zeroShotCat] || 'other';
+      } catch (e) {
+        console.warn('Zero-shot classifier failed, falling back to LLM tag category:', e.message);
+        const validCategories = [
+          'pricing change',
+          'product or feature update',
+          'hiring signal',
+          'content or messaging shift',
+          'leadership or company change',
+          'other'
+        ];
+        finalCategory = validCategories.includes(category) ? category : 'other';
+      }
 
       resolve({
         category: finalCategory,
