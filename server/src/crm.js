@@ -58,20 +58,36 @@ async function syncToNotion(card, config, screenshotUrl) {
 
   const cardTitle = `[${card.category.toUpperCase()}] ${card.competitor_name}`;
 
+  // Retrieve actual database schema to resolve properties matching case-insensitively and ignoring whitespaces
+  const dbInfo = await notion.databases.retrieve({ database_id: config.notion_db_id });
+  const actualProperties = dbInfo.properties || {};
+
+  const getPropName = (targetName) => {
+    const norm = targetName.toLowerCase().trim();
+    for (const key of Object.keys(actualProperties)) {
+      if (key.toLowerCase().trim() === norm) {
+        return key;
+      }
+    }
+    return targetName; // fallback
+  };
+
   // Idempotency check: Search database for an existing entry with the same card title or URL
   try {
+    const urlProp = getPropName('URL');
+    const titleProp = getPropName('Title');
     const existing = await notion.databases.query({
       database_id: config.notion_db_id,
       filter: {
         and: [
           {
-            property: 'URL',
+            property: urlProp,
             url: {
               equals: card.competitor_url
             }
           },
           {
-            property: 'Title',
+            property: titleProp,
             title: {
               equals: cardTitle
             }
@@ -88,7 +104,7 @@ async function syncToNotion(card, config, screenshotUrl) {
   }
 
   const properties = {
-    'Title': {
+    [getPropName('Title')]: {
       title: [
         {
           text: {
@@ -97,23 +113,23 @@ async function syncToNotion(card, config, screenshotUrl) {
         }
       ]
     },
-    'Competitor Name': {
+    [getPropName('Competitor Name')]: {
       select: {
         name: card.competitor_name.replace(/,/g, '') // Notion selects don't allow commas
       }
     },
-    'URL': {
+    [getPropName('URL')]: {
       url: card.competitor_url
     },
-    'Category': {
+    [getPropName('Category')]: {
       select: {
         name: card.category
       }
     },
-    'Impact Score': {
+    [getPropName('Impact Score')]: {
       number: card.impact_score
     },
-    'Recommended Action': {
+    [getPropName('Recommended Action')]: {
       rich_text: [
         {
           text: {
@@ -122,7 +138,7 @@ async function syncToNotion(card, config, screenshotUrl) {
         }
       ]
     },
-    'Summary': {
+    [getPropName('Summary')]: {
       rich_text: [
         {
           text: {
@@ -131,7 +147,7 @@ async function syncToNotion(card, config, screenshotUrl) {
         }
       ]
     },
-    'Justification': {
+    [getPropName('Justification')]: {
       rich_text: [
         {
           text: {
@@ -143,7 +159,7 @@ async function syncToNotion(card, config, screenshotUrl) {
   };
 
   if (screenshotUrl) {
-    properties['Screenshot URL'] = {
+    properties[getPropName('Screenshot URL')] = {
       url: screenshotUrl
     };
   }
