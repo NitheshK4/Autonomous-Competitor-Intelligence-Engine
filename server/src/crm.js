@@ -56,7 +56,8 @@ async function syncCard(card, config, hostUrl = 'http://localhost:3000') {
 async function syncToNotion(card, config, screenshotUrl) {
   const notion = new Client({ auth: config.notion_token });
 
-  const cardTitle = `[${card.category.toUpperCase()}] ${card.competitor_name}`;
+  const dateStr = card.timestamp ? card.timestamp.split('T')[0] : new Date().toISOString().split('T')[0];
+  const cardTitle = `[${card.category.toUpperCase()}] ${card.competitor_name} (${dateStr})`;
 
   // Retrieve actual database schema to resolve properties matching case-insensitively and ignoring whitespaces
   const dbInfo = await notion.databases.retrieve({ database_id: config.notion_db_id });
@@ -174,7 +175,8 @@ async function syncToNotion(card, config, screenshotUrl) {
 async function syncToAirtable(card, config, screenshotUrl) {
   const tableName = config.airtable_table_name || 'Competitor Intel';
   const url = `https://api.airtable.com/v0/${config.airtable_base_id}/${encodeURIComponent(tableName)}`;
-  const cardTitle = `[${card.category.toUpperCase()}] ${card.competitor_name}`;
+  const dateStr = card.timestamp ? card.timestamp.split('T')[0] : new Date().toISOString().split('T')[0];
+  const cardTitle = `[${card.category.toUpperCase()}] ${card.competitor_name} (${dateStr})`;
 
   // Idempotency check: Search Airtable for an existing entry with the same title and URL
   try {
