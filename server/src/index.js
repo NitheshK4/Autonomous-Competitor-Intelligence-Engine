@@ -217,7 +217,7 @@ app.get('/api/debug-status', async (req, res) => {
     const dbInst = await db.getDb();
     
     const scrapes = await dbInst.all(
-      'SELECT id, competitor_id, timestamp, screenshot_path FROM scrapes ORDER BY id DESC LIMIT 20'
+      'SELECT id, competitor_id, timestamp, length(text_content) as text_len, substr(text_content, 1, 100) as text_preview, screenshot_path FROM scrapes ORDER BY id DESC LIMIT 20'
     );
     const cards = await dbInst.all(
       'SELECT id, competitor_id, timestamp, category, impact_score FROM intelligence_cards ORDER BY id DESC LIMIT 20'

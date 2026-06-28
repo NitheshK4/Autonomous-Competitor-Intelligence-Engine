@@ -96,48 +96,6 @@ function getChunks(text) {
 }
 
 /**
- * Call the Python semantic change detection script as a subprocess.
- */
-async function detectChangesPython(oldText, newText, threshold = 0.85) {
-  return new Promise((resolve, reject) => {
-    const pythonScript = path.join(__dirname, 'semantic_detector.py');
-    // Spawn Python3 process
-    const child = spawn('python3', [pythonScript]);
-
-    let stdoutData = '';
-    let stderrData = '';
-
-    child.stdout.on('data', (data) => {
-      stdoutData += data.toString();
-    });
-
-    child.stderr.on('data', (data) => {
-      stderrData += data.toString();
-    });
-
-    child.on('close', (code) => {
-      if (code !== 0) {
-        return reject(new Error(`Python process exited with code ${code}. Stderr: ${stderrData}`));
-      }
-      try {
-        const result = JSON.parse(stdoutData.trim());
-        if (result.error) {
-          return reject(new Error(result.error));
-        }
-        resolve(result);
-      } catch (err) {
-        reject(new Error(`Failed to parse Python stdout: ${stdoutData}. Error: ${err.message}`));
-      }
-    });
-
-    // Write input variables to standard input of the Python script
-    const input = JSON.stringify({ old_text: oldText, new_text: newText, threshold });
-    child.stdin.write(input);
-    child.stdin.end();
-  });
-}
-
-/**
  * Compare two text versions semantically chunk-by-chunk using pure JavaScript.
  * (Saved as a robust local fallback engine).
  */
@@ -232,7 +190,7 @@ async function detectChangesJS(oldText, newText, threshold = 0.85) {
 
 /**
  * Compare two text versions semantically chunk-by-chunk.
- * Primary: Python sentence-transformers script.
+ * Primary: Gemini API with rate-limiting retry.
  * Fallback: Local JS-ONNX transformers pipeline.
  */
 async function detectChangesGemini(oldText, newText, apiKey) {
@@ -262,17 +220,34 @@ Compare the two contents and return the JSON response.`;
 
   const prompt = `${systemPrompt}\n\n${userPrompt}`;
 
-  const res = await axios.post(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    {
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { 
-        temperature: 0.1,
-        responseMimeType: "application/json"
+  let res;
+  let retries = 3;
+  let delay = 1000;
+  
+  for (let i = 0; i < retries; i++) {
+    try {
+      res = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { 
+            temperature: 0.1,
+            responseMimeType: "application/json"
+          }
+        },
+        { headers: { 'Content-Type': 'application/json' }, timeout: 15000 }
+      );
+      break;
+    } catch (err) {
+      if (err.response && err.response.status === 429 && i < retries - 1) {
+        console.warn(`Gemini change detection rate limited (429). Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2;
+      } else {
+        throw err;
       }
-    },
-    { headers: { 'Content-Type': 'application/json' }, timeout: 15000 }
-  );
+    }
+  }
 
   const rawText = res.data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
   const parsed = JSON.parse(rawText.trim());
@@ -329,11 +304,10 @@ async function detectChanges(oldText, newText, threshold = 0.85) {
   }
 
   try {
-    // Attempt Python sentence-transformers first (primary assignment engine)
-    return await detectChangesPython(oldText, newText, threshold);
-  } catch (err) {
-    console.warn(`Python semantic detector failed, falling back to local JS embedder:`, err.message);
     return await detectChangesJS(oldText, newText, threshold);
+  } catch (err) {
+    console.warn(`Local JS embedder failed, falling back to lightweight word similarity:`, err.message);
+    return detectChangesLightweight(oldText, newText, threshold);
   }
 }
 
