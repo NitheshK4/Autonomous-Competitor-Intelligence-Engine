@@ -957,7 +957,16 @@ function DetailsPage({ competitorId, competitors, onBack, onDelete, onCheckNow, 
           </a>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="btn btn-primary" onClick={() => onCheckNow(competitor.id)}>
+          <button 
+            className="btn btn-primary" 
+            onClick={async () => {
+              await onCheckNow(competitor.id);
+              // Refresh this detail page's data after the background scrape completes (approx 15 seconds)
+              setTimeout(() => {
+                fetchCompetitorData();
+              }, 15000);
+            }}
+          >
             Check Scrape Now
           </button>
           <button className="btn btn-danger" onClick={() => onDelete(competitor.id)}>
