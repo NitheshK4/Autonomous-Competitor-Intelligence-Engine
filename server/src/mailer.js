@@ -135,13 +135,26 @@ async function sendDigestEmail(period = 'daily') {
 
   // Query all cards since last digest
   const cards = await db.getIntelligenceCards();
-  const newCards = lastDigest
+  let newCards = lastDigest
     ? cards.filter(c => new Date(c.timestamp) > new Date(lastDigest))
     : cards; // Send all on first run
 
-  if (newCards.length === 0) {
-    console.log('Skipping digest email: No new competitor changes detected since last digest.');
-    return { success: true, reason: 'No new changes' };
+  if (period === 'test') {
+    if (newCards.length === 0) {
+      newCards = [{
+        competitor_name: 'Example Competitor',
+        category: 'pricing change',
+        impact_score: 8,
+        summary: 'This is a mock intelligence card to test your SMTP configuration. The competitor has reduced their entry-level plan price by 30%.',
+        recommendation: 'Verify that this test email was received successfully in your inbox.',
+        timestamp: now
+      }];
+    }
+  } else {
+    if (newCards.length === 0) {
+      console.log('Skipping digest email: No new competitor changes detected since last digest.');
+      return { success: true, reason: 'No new changes' };
+    }
   }
 
   console.log(`Sending ${period} digest email containing ${newCards.length} changes to ${emailConfig.recipient_email}...`);
