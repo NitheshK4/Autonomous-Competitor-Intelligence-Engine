@@ -47,6 +47,11 @@ async function checkExtensionAuth(req, res, next) {
 // API ROUTES
 // ----------------------------------------------------
 
+// Health check / keep-alive endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Business Profile (Onboarding)
 app.get('/api/profile', async (req, res) => {
   try {
@@ -409,7 +414,8 @@ if (fs.existsSync(CLIENT_DIST)) {
 // Polling interval loop for checking competitors (runs every 5 minutes)
 async function startCompetitorScheduler() {
   console.log('Background competitor check scheduler started.');
-  setInterval(async () => {
+  
+  const runSchedulerCheck = async () => {
     try {
       const list = await db.getCompetitors();
       const now = new Date();
@@ -441,7 +447,13 @@ async function startCompetitorScheduler() {
     } catch (e) {
       console.error('Error in competitor check scheduler loop:', e.message);
     }
-  }, 5 * 60 * 1000); // 5 minutes
+  };
+
+  // Run check immediately on startup
+  await runSchedulerCheck();
+
+  // Run every 5 minutes
+  setInterval(runSchedulerCheck, 5 * 60 * 1000); // 5 minutes
 }
 
 // Polling interval loop for sending digests (runs every hour)
@@ -482,6 +494,23 @@ async function startDigestScheduler() {
   }, 60 * 60 * 1000); // 1 hour
 }
 
+// Keep-alive loop to prevent free-tier servers from sleeping by self-pinging every 10 minutes
+function startKeepAliveScheduler() {
+  console.log('Background keep-alive self-ping scheduler started.');
+  setInterval(async () => {
+    try {
+      const hostUrl = await db.getSetting('host_url');
+      if (hostUrl && !hostUrl.includes('localhost')) {
+        console.log(`Keep-Alive: Self-pinging endpoint ${hostUrl}/health...`);
+        const axios = require('axios');
+        await axios.get(`${hostUrl}/health`, { timeout: 10000 });
+      }
+    } catch (e) {
+      console.warn('Keep-Alive self-ping failed:', e.message);
+    }
+  }, 10 * 60 * 1000); // 10 minutes
+}
+
 // ----------------------------------------------------
 // SERVER LAUNCH
 // ----------------------------------------------------
@@ -494,6 +523,7 @@ app.listen(PORT, async () => {
     // Start scheduler loops
     startCompetitorScheduler();
     startDigestScheduler();
+    startKeepAliveScheduler();
   } catch (err) {
     console.error('Post startup initialization failed:', err.message);
   }

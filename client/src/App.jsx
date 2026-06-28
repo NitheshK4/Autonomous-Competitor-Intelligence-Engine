@@ -28,7 +28,16 @@ export default function App() {
     try {
       // Check onboarding profile first
       const profileRes = await fetch('/api/profile');
+      if (!profileRes.ok) {
+        throw new Error('Failed to load profile from server');
+      }
       const profileData = await profileRes.json();
+      
+      // If profileData has an error property from the backend
+      if (profileData && profileData.error) {
+        throw new Error(profileData.error);
+      }
+      
       setProfile(profileData);
       
       if (!profileData) {
@@ -38,6 +47,9 @@ export default function App() {
         setOnboarded(true);
         // Load settings and competitors
         const settingsRes = await fetch('/api/settings');
+        if (!settingsRes.ok) {
+          throw new Error('Failed to load settings from server');
+        }
         const settingsData = await settingsRes.json();
         setSettings(settingsData);
 
@@ -46,7 +58,7 @@ export default function App() {
       }
     } catch (err) {
       console.error(err);
-      setError('Failed to connect to backend server. Ensure it is running.');
+      setError(err.message || 'Failed to connect to backend server. Ensure it is running.');
     } finally {
       setLoading(false);
     }
@@ -55,8 +67,13 @@ export default function App() {
   const refreshCompetitors = async () => {
     try {
       const res = await fetch('/api/competitors');
+      if (!res.ok) throw new Error('Network response was not ok');
       const data = await res.json();
-      setCompetitors(data);
+      if (Array.isArray(data)) {
+        setCompetitors(data);
+      } else {
+        console.error('Competitors data is not an array:', data);
+      }
     } catch (e) {
       console.error('Failed to reload competitors:', e);
     }
@@ -65,8 +82,13 @@ export default function App() {
   const refreshFeed = async () => {
     try {
       const res = await fetch('/api/intelligence');
+      if (!res.ok) throw new Error('Network response was not ok');
       const data = await res.json();
-      setFeedCards(data);
+      if (Array.isArray(data)) {
+        setFeedCards(data);
+      } else {
+        console.error('Feed data is not an array:', data);
+      }
     } catch (e) {
       console.error('Failed to reload intelligence feed:', e);
     }
@@ -748,6 +770,7 @@ function FeedPage({ cards, competitors, onRetryCrm, onViewDiff, onViewScreenshot
 function DetailsPage({ competitorId, competitors, onBack, onDelete, onCheckNow, onUpdateCompetitor }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   // Settings Form State
   const [form, setForm] = useState({
@@ -758,24 +781,35 @@ function DetailsPage({ competitorId, competitors, onBack, onDelete, onCheckNow, 
   });
 
   useEffect(() => {
-    fetchCompetitorData();
+    if (competitorId) {
+      fetchCompetitorData();
+    }
   }, [competitorId]);
 
   const fetchCompetitorData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`/api/competitors/${competitorId}`);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+      }
       const compData = await res.json();
+      if (!compData || !compData.competitor) {
+        throw new Error('Invalid competitor data received from server');
+      }
       setData(compData);
       
       setForm({
-        name: compData.competitor.name,
-        interval_hours: compData.competitor.interval_hours,
-        scope: compData.competitor.scope,
+        name: compData.competitor.name || '',
+        interval_hours: compData.competitor.interval_hours || 6,
+        scope: compData.competitor.scope || 'full',
         js_enabled: compData.competitor.js_enabled === 1
       });
     } catch (e) {
-      console.error(e);
+      console.error('Error fetching competitor details:', e);
+      setError(e.message || 'Failed to load competitor details.');
     } finally {
       setLoading(false);
     }
@@ -803,6 +837,16 @@ function DetailsPage({ competitorId, competitors, onBack, onDelete, onCheckNow, 
       <div className="loading-container">
         <div className="spinner"></div>
         <p>Loading competitor details...</p>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="glass-panel" style={{ padding: '24px', borderLeft: '4px solid var(--color-danger)', marginBottom: '30px' }}>
+        <h3 style={{ color: 'var(--color-danger)' }}>Error Loading Details</h3>
+        <p>{error || 'No competitor data found.'}</p>
+        <button className="btn" style={{ marginTop: '15px' }} onClick={onBack}>⬅️ Back to Dashboard</button>
       </div>
     );
   }
@@ -905,7 +949,7 @@ function DetailsPage({ competitorId, competitors, onBack, onDelete, onCheckNow, 
       <div className="page-header" style={{ marginBottom: '24px' }}>
         <div>
           <span className="badge badge-success" style={{ marginBottom: '8px' }}>
-            {competitor.status.toUpperCase()}
+            {(competitor.status || '').toUpperCase()}
           </span>
           <h1 className="page-title">{competitor.name}</h1>
           <a href={competitor.url} target="_blank" rel="noopener noreferrer" className="card-url">
@@ -943,7 +987,7 @@ function DetailsPage({ competitorId, competitors, onBack, onDelete, onCheckNow, 
                       </span>
                     </div>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: '10px 0' }}>
-                      {card.summary.split('\n')[0]}
+                      {card.summary ? card.summary.split('\n')[0] : ''}
                     </p>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                       Checked on: {new Date(card.timestamp).toLocaleString()}
