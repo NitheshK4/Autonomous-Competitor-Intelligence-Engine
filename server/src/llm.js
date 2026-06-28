@@ -334,6 +334,12 @@ Analyze the competitor's changes above and generate the classified intelligence 
     }
   }
 
+  // If we are on Railway or other memory-constrained cloud environments, running a local model will crash the container
+  const isCloudEnv = !!(process.env.RAILWAY_STATIC_URL || process.env.RAILWAY_SERVICE_ID || process.env.RENDER_EXTERNAL_URL);
+  if (isCloudEnv) {
+    throw new Error('Local Qwen model inference is disabled in cloud environments to prevent Out-Of-Memory crashes. Please configure the GEMINI_API_KEY environment variable in your deployment settings.');
+  }
+
   const llamaPath = await downloadLlamaCli();
   await downloadModel();
 
