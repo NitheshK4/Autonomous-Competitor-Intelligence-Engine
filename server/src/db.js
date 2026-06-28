@@ -333,7 +333,39 @@ async function removeFromCrmQueue(cardId) {
 async function getSetting(key) {
   const db = await getDb();
   const row = await db.get('SELECT value FROM settings WHERE key = ?', [key]);
-  return row ? row.value : null;
+  let val = row ? row.value : null;
+
+  if (key === 'crm_config') {
+    try {
+      const config = val ? JSON.parse(val) : { active_crm: 'none', notion_token: '', notion_db_id: '', airtable_key: '', airtable_base_id: '', airtable_table_name: 'Competitor Intel' };
+      let changed = false;
+      if (process.env.NOTION_TOKEN && (!config.notion_token || config.active_crm === 'none')) {
+        config.active_crm = 'notion';
+        config.notion_token = process.env.NOTION_TOKEN;
+        changed = true;
+      }
+      const envDbId = process.env.NOTION_DB_ID || process.env.NOTION_DATABASE_ID;
+      if (envDbId && !config.notion_db_id) {
+        config.notion_db_id = envDbId;
+        changed = true;
+      }
+      if (changed) {
+        val = JSON.stringify(config);
+      }
+    } catch (e) {
+      // Ignore JSON parse errors
+    }
+  } else if (key === 'slack_webhook_url') {
+    if ((!val || val === '') && process.env.SLACK_WEBHOOK_URL) {
+      val = process.env.SLACK_WEBHOOK_URL;
+    }
+  } else if (key === 'api_key') {
+    if ((!val || val === '') && process.env.API_KEY) {
+      val = process.env.API_KEY;
+    }
+  }
+
+  return val;
 }
 
 async function setSetting(key, value) {
