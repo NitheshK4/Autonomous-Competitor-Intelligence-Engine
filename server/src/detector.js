@@ -236,13 +236,14 @@ async function detectChangesJS(oldText, newText, threshold = 0.85) {
  * Fallback: Local JS-ONNX transformers pipeline.
  */
 async function detectChangesGemini(oldText, newText, apiKey) {
-  const systemPrompt = `You are a Competitor Intelligence change detector. Your job is to compare the old text of a competitor's website with the new text, and determine if there are any meaningful business changes (e.g. pricing changes, feature/product updates, hiring signals, leadership changes, or messaging shifts).
-Ignore cosmetic changes (like timestamp updates, minor rewording that doesn't change meaning, copyright year updates, comment count updates, or layout changes).
+  const systemPrompt = `You are a text change detector. Your job is to compare the old text of a webpage with the new text, and determine if the core content has changed significantly.
+Ignore minor cosmetic noise (like clock timestamps changing, minor page views/comment counters incrementing, or copyright years updating).
+If new sections, articles, text blocks, or headlines have been added, removed, or rewritten, you must flag this as a change.
 
 Respond STRICTLY in JSON format with these exact keys:
 {
   "hasChanged": true or false,
-  "similarity": a float between 0.0 and 1.0 (where 1.0 means no meaningful change, and lower values mean more change),
+  "similarity": a float between 0.0 and 1.0 (where 1.0 means no change at all, and lower values mean more change. If some headlines/posts changed, similarity should be around 0.5 to 0.8),
   "diffText": "A string highlighting the changes, like adding lines with + and removing with -"
 }`;
 
