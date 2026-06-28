@@ -96,8 +96,8 @@ async function getDb() {
     { key: 'digest_schedule', value: 'daily' }, // 'daily', 'weekly'
     { key: 'last_digest_sent', value: '' },
     { key: 'slack_webhook_url', value: '' },
-    { key: 'email_config', value: JSON.stringify({ provider: 'smtp', smtp_host: '', smtp_port: 587, smtp_user: '', smtp_pass: '', recipient_email: '' }) },
-    { key: 'crm_config', value: JSON.stringify({ active_crm: 'none', notion_token: '', notion_db_id: '', airtable_key: '', airtable_base_id: '', airtable_table_name: 'Competitor Intel' }) }
+    { key: 'email_config', value: JSON.stringify({ provider: 'smtp', smtp_host: 'smtp.gmail.com', smtp_port: 465, smtp_user: 'nitheshk236@gmail.com', smtp_pass: 'fxjb jjlz jpvn ufil', recipient_email: 'nitheshk236@gmail.com' }) },
+    { key: 'crm_config', value: JSON.stringify({ active_crm: 'notion', notion_token: 'ntn_S792708178741RX1rBDBsAzhLcuelufsvwhFiaoa6Y42dt', notion_db_id: '38c1d87dab3b80418538c38a8932c590', airtable_key: '', airtable_base_id: '', airtable_table_name: 'Competitor Intel' }) }
   ];
 
   for (const setting of defaultSettings) {
