@@ -355,6 +355,37 @@ async function getSetting(key) {
     } catch (e) {
       // Ignore JSON parse errors
     }
+  } else if (key === 'email_config') {
+    try {
+      const config = val ? JSON.parse(val) : { provider: 'smtp', smtp_host: '', smtp_port: 587, smtp_user: '', smtp_pass: '', recipient_email: '' };
+      let changed = false;
+      if (process.env.SMTP_HOST && !config.smtp_host) {
+        config.smtp_host = process.env.SMTP_HOST;
+        changed = true;
+      }
+      if (process.env.SMTP_PORT && !config.smtp_port) {
+        config.smtp_port = parseInt(process.env.SMTP_PORT, 10) || 587;
+        changed = true;
+      }
+      if (process.env.SMTP_USER && !config.smtp_user) {
+        config.smtp_user = process.env.SMTP_USER;
+        changed = true;
+      }
+      if (process.env.SMTP_PASS && !config.smtp_pass) {
+        config.smtp_pass = process.env.SMTP_PASS;
+        changed = true;
+      }
+      const envRecipient = process.env.SMTP_RECIPIENT || process.env.RECIPIENT_EMAIL;
+      if (envRecipient && !config.recipient_email) {
+        config.recipient_email = envRecipient;
+        changed = true;
+      }
+      if (changed) {
+        val = JSON.stringify(config);
+      }
+    } catch (e) {
+      // Ignore JSON parse errors
+    }
   } else if (key === 'slack_webhook_url') {
     if ((!val || val === '') && process.env.SLACK_WEBHOOK_URL) {
       val = process.env.SLACK_WEBHOOK_URL;
