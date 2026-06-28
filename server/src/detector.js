@@ -235,7 +235,98 @@ async function detectChangesJS(oldText, newText, threshold = 0.85) {
  * Primary: Python sentence-transformers script.
  * Fallback: Local JS-ONNX transformers pipeline.
  */
+async function detectChangesGemini(oldText, newText, apiKey) {
+  const systemPrompt = `You are a Competitor Intelligence change detector. Your job is to compare the old text of a competitor's website with the new text, and determine if there are any meaningful business changes (e.g. pricing changes, feature/product updates, hiring signals, leadership changes, or messaging shifts).
+Ignore cosmetic changes (like timestamp updates, minor rewording that doesn't change meaning, copyright year updates, comment count updates, or layout changes).
+
+Respond STRICTLY in JSON format with these exact keys:
+{
+  "hasChanged": true or false,
+  "similarity": a float between 0.0 and 1.0 (where 1.0 means no meaningful change, and lower values mean more change),
+  "diffText": "A string highlighting the changes, like adding lines with + and removing with -"
+}`;
+
+  const userPrompt = `
+Old Webpage Content:
+"""
+${oldText || '(Empty)'}
+"""
+
+New Webpage Content:
+"""
+${newText || '(Empty)'}
+"""
+
+Compare the two contents and return the JSON response.`;
+
+  const prompt = `${systemPrompt}\n\n${userPrompt}`;
+
+  const res = await axios.post(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { 
+        temperature: 0.1,
+        responseMimeType: "application/json"
+      }
+    },
+    { headers: { 'Content-Type': 'application/json' }, timeout: 15000 }
+  );
+
+  const rawText = res.data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const parsed = JSON.parse(rawText.trim());
+  
+  return {
+    hasChanged: !!parsed.hasChanged,
+    similarity: parseFloat(parsed.similarity ?? 0.5),
+    diffText: parsed.diffText || '',
+    addedChunks: [],
+    removedChunks: []
+  };
+}
+
+function detectChangesLightweight(oldText, newText, threshold = 0.85) {
+  const getWords = (text) => {
+    if (!text) return new Set();
+    return new Set(text.toLowerCase().match(/\b\w{3,}\b/g) || []);
+  };
+
+  const oldWords = getWords(oldText);
+  const newWords = getWords(newText);
+
+  if (oldWords.size === 0 && newWords.size === 0) {
+    return { hasChanged: false, similarity: 1.0, diffText: '', addedChunks: [], removedChunks: [] };
+  }
+
+  const intersection = new Set([...oldWords].filter(w => newWords.has(w)));
+  const union = new Set([...oldWords, ...newWords]);
+  const jaccardSim = intersection.size / union.size;
+
+  const hasChanged = jaccardSim < threshold;
+
+  return {
+    hasChanged,
+    similarity: jaccardSim,
+    diffText: hasChanged ? `Content changed. Overlap similarity: ${jaccardSim.toFixed(2)}` : '',
+    addedChunks: [],
+    removedChunks: []
+  };
+}
+
 async function detectChanges(oldText, newText, threshold = 0.85) {
+  const isCloudEnv = !!(process.env.RAILWAY_STATIC_URL || process.env.RAILWAY_SERVICE_ID || process.env.RENDER_EXTERNAL_URL);
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+
+  if (isCloudEnv && geminiApiKey) {
+    try {
+      console.log('Cloud environment detected: Using Gemini API for semantic change detection to save memory...');
+      return await detectChangesGemini(oldText, newText, geminiApiKey);
+    } catch (err) {
+      console.warn('Gemini semantic change detection failed, falling back to lightweight word similarity:', err.message);
+      return detectChangesLightweight(oldText, newText, threshold);
+    }
+  }
+
   try {
     // Attempt Python sentence-transformers first (primary assignment engine)
     return await detectChangesPython(oldText, newText, threshold);
