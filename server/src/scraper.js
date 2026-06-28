@@ -226,15 +226,12 @@ async function runScrape(competitor) {
       
       // If we want screenshots even for static pages, we can fetch them via a quick Puppeteer launch.
       // We do this inside a try-catch so that if Puppeteer fails, we still have the text content!
-      // In cloud environments, we skip this to prevent Out-Of-Memory crashes!
       let screenshotPath = '';
-      if (!isCloudEnv) {
-        try {
-          const pResult = await scrapeDynamic(url, scope, null, id);
-          screenshotPath = pResult.screenshotPath;
-        } catch (e) {
-          console.error('Screenshot capture failed for static page:', e.message);
-        }
+      try {
+        const pResult = await scrapeDynamic(url, scope, null, id);
+        screenshotPath = pResult.screenshotPath;
+      } catch (e) {
+        console.error('Screenshot capture failed for static page:', e.message);
       }
       
       return {
@@ -244,10 +241,16 @@ async function runScrape(competitor) {
       };
     } catch (err) {
       console.log(`Static scrape failed for ${url}, trying dynamic fallback...`);
-      if (isCloudEnv) {
-        throw new Error(`Static scrape failed: ${err.message}. Dynamic fallback is disabled in cloud environments to prevent Out-Of-Memory crashes.`);
+      try {
+        const pResult = await scrapeDynamic(url, scope, null, id);
+        return {
+          textContent: pResult.textContent,
+          htmlContent: pResult.htmlContent,
+          screenshotPath: pResult.screenshotPath
+        };
+      } catch (fallbackErr) {
+        throw new Error(`Static scrape failed: ${err.message}. Dynamic fallback also failed: ${fallbackErr.message}`);
       }
-      return await scrapeDynamic(url, scope, null, id);
     }
   }
 }
