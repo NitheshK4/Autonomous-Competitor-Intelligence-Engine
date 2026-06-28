@@ -1188,6 +1188,7 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
   const [threshold, setThreshold] = useState(settings?.semantic_threshold || 0.85);
   const [schedule, setSchedule] = useState(settings?.digest_schedule || 'daily');
   const [slackWebhookUrl, setSlackWebhookUrl] = useState(settings?.slack_webhook_url || '');
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // Keep state synchronized with props when they load or change
   useEffect(() => {
@@ -1437,8 +1438,21 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
                   placeholder="recipient-manager@mycompany.com"
                 />
               </div>
-              <button type="button" className="btn" style={{ marginRight: '10px' }} onClick={onTestEmail}>
-                ✉️ Send Test Digest Now
+              <button 
+                type="button" 
+                className="btn" 
+                style={{ marginRight: '10px' }} 
+                onClick={async () => {
+                  setIsSendingEmail(true);
+                  try {
+                    await onTestEmail();
+                  } finally {
+                    setIsSendingEmail(false);
+                  }
+                }}
+                disabled={isSendingEmail}
+              >
+                {isSendingEmail ? '✉️ Sending...' : '✉️ Send Test Digest Now'}
               </button>
             </div>
 
