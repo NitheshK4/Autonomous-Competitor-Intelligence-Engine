@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 const db = require('./db');
 
 // Generate HTML Content for the digest email
@@ -157,36 +158,56 @@ async function sendDigestEmail(period = 'daily') {
     }
   }
 
-  console.log(`Sending ${period} digest email containing ${newCards.length} changes to ${emailConfig.recipient_email}...`);
-
-  const transporter = nodemailer.createTransport({
-    host: emailConfig.smtp_host,
-    port: parseInt(emailConfig.smtp_port || '587', 10),
-    secure: parseInt(emailConfig.smtp_port || '587', 10) === 465,
-    auth: {
-      user: emailConfig.smtp_user,
-      pass: emailConfig.smtp_pass
-    }
-  });
-
   const periodName = period.charAt(0).toUpperCase() + period.slice(1);
   const htmlContent = generateDigestHtml(newCards, periodName);
+  const emailSubject = `[ACIE] Competitor Intelligence Digest - ${newCards.length} New Alerts`;
+
+  const isResend = emailConfig.smtp_pass && emailConfig.smtp_pass.startsWith('re_');
 
   try {
-    await transporter.sendMail({
-      from: `"Competitor Intel Bot" <${emailConfig.smtp_user}>`,
-      to: emailConfig.recipient_email,
-      subject: `[ACIE] Competitor Intelligence Digest - ${newCards.length} New Alerts`,
-      html: htmlContent
-    });
+    if (isResend) {
+      console.log('Sending email via Resend HTTP API...');
+      // Free Resend account can only send from onboarding@resend.dev
+      const fromEmail = 'onboarding@resend.dev';
+      await axios.post('https://api.resend.com/emails', {
+        from: `Competitor Intel Bot <${fromEmail}>`,
+        to: emailConfig.recipient_email,
+        subject: emailSubject,
+        html: htmlContent
+      }, {
+        headers: {
+          'Authorization': `Bearer ${emailConfig.smtp_pass}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000
+      });
+    } else {
+      console.log('Sending email via standard SMTP...');
+      const transporter = nodemailer.createTransport({
+        host: emailConfig.smtp_host,
+        port: parseInt(emailConfig.smtp_port || '587', 10),
+        secure: parseInt(emailConfig.smtp_port || '587', 10) === 465,
+        auth: {
+          user: emailConfig.smtp_user,
+          pass: emailConfig.smtp_pass
+        }
+      });
+      await transporter.sendMail({
+        from: `"Competitor Intel Bot" <${emailConfig.smtp_user}>`,
+        to: emailConfig.recipient_email,
+        subject: emailSubject,
+        html: htmlContent
+      });
+    }
 
     // Update last digest sent time
     await db.setSetting('last_digest_sent', now);
     console.log('Digest email sent successfully.');
     return { success: true, count: newCards.length };
   } catch (err) {
-    console.error('Failed to send digest email:', err.message);
-    return { success: false, error: err.message };
+    const errorMsg = err.response?.data?.message || err.message;
+    console.error('Failed to send digest email:', errorMsg);
+    return { success: false, error: errorMsg };
   }
 }
 
