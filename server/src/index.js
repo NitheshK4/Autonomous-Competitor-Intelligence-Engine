@@ -210,6 +210,36 @@ app.get('/api/intelligence', async (req, res) => {
   }
 });
 
+// Debug endpoint for checking server stats and variables
+app.get('/api/debug-status', async (req, res) => {
+  try {
+    const list = await db.getCompetitors();
+    const dbInst = await db.getDb();
+    
+    const scrapes = await dbInst.all(
+      'SELECT id, competitor_id, timestamp, has_changes, similarity_score FROM scrape_history ORDER BY id DESC LIMIT 20'
+    );
+    const cards = await dbInst.all(
+      'SELECT id, competitor_id, timestamp, category, impact_score FROM intelligence_cards ORDER BY id DESC LIMIT 20'
+    );
+
+    res.json({
+      env: {
+        NODE_ENV: process.env.NODE_ENV,
+        RAILWAY_STATIC_URL: process.env.RAILWAY_STATIC_URL,
+        PORT: process.env.PORT,
+        HAS_GEMINI_KEY: !!process.env.GEMINI_API_KEY,
+        GEMINI_KEY_PREFIX: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.substring(0, 6) + '...' : 'none'
+      },
+      competitors: list.map(c => ({ id: c.id, name: c.name, status: c.status, last_checked: c.last_checked })),
+      scrapes,
+      cards
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/intelligence/read-all', async (req, res) => {
   try {
     await db.markAllAsRead();
