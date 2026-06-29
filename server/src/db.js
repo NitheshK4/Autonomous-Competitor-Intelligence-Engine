@@ -482,15 +482,21 @@ async function removeFromCrmQueue(cardId) {
 
 // Settings operations
 async function getSetting(workspaceId = 'global', key) {
+  let finalWorkspaceId = workspaceId;
   let finalKey = key;
   if (key === undefined) {
     finalKey = workspaceId;
+    finalWorkspaceId = 'global';
   }
+
+  const isGlobalKey = finalKey !== 'api_key';
+  const queryWorkspaceId = isGlobalKey ? 'global' : finalWorkspaceId;
+
   const db = await getDb();
-  let row = await db.get('SELECT value FROM settings WHERE workspace_id = "global" AND key = ?', [finalKey]);
+  let row = await db.get('SELECT value FROM settings WHERE workspace_id = ? AND key = ?', [queryWorkspaceId, finalKey]);
 
   if (!row) {
-    // Dynamically seed default values for the global workspace using environment variables
+    // Dynamically seed default values for the global or workspace-specific configurations
     const defaults = {
       api_key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
       digest_schedule: 'daily',
@@ -517,7 +523,7 @@ async function getSetting(workspaceId = 'global', key) {
     if (finalKey in defaults) {
       await db.run(
         'INSERT OR REPLACE INTO settings (workspace_id, key, value) VALUES (?, ?, ?)',
-        ['global', finalKey, defaults[finalKey]]
+        [queryWorkspaceId, finalKey, defaults[finalKey]]
       );
       row = { value: defaults[finalKey] };
     }
@@ -590,16 +596,22 @@ async function getSetting(workspaceId = 'global', key) {
 }
 
 async function setSetting(workspaceId = 'global', key, value) {
+  let finalWorkspaceId = workspaceId;
   let finalKey = key;
   let finalValue = value;
   if (value === undefined) {
     finalValue = key;
     finalKey = workspaceId;
+    finalWorkspaceId = 'global';
   }
+
+  const isGlobalKey = finalKey !== 'api_key';
+  const saveWorkspaceId = isGlobalKey ? 'global' : finalWorkspaceId;
+
   const db = await getDb();
   await db.run(
-    'INSERT OR REPLACE INTO settings (workspace_id, key, value) VALUES ("global", ?, ?)',
-    [finalKey, finalValue]
+    'INSERT OR REPLACE INTO settings (workspace_id, key, value) VALUES (?, ?, ?)',
+    [saveWorkspaceId, finalKey, finalValue]
   );
   return finalValue;
 }
