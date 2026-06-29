@@ -455,14 +455,28 @@ async function getSetting(workspaceId = 'global', key) {
   let row = await db.get('SELECT value FROM settings WHERE workspace_id = "global" AND key = ?', [finalKey]);
 
   if (!row) {
-    // Dynamically seed default values for the global workspace
+    // Dynamically seed default values for the global workspace using environment variables
     const defaults = {
       api_key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
       digest_schedule: 'daily',
       last_digest_sent: '',
       slack_webhook_url: process.env.SLACK_WEBHOOK_URL || '',
-      email_config: JSON.stringify({ provider: 'smtp', smtp_host: 'smtp.gmail.com', smtp_port: 465, smtp_user: 'nitheshk236@gmail.com', smtp_pass: 'fxjb jjlz jpvn ufil', recipient_email: 'nitheshk236@gmail.com' }),
-      crm_config: JSON.stringify({ active_crm: 'none', notion_token: '', notion_db_id: '', airtable_key: '', airtable_base_id: '', airtable_table_name: 'Competitor Intel' })
+      email_config: JSON.stringify({
+        provider: (process.env.SMTP_PASS && process.env.SMTP_PASS.startsWith('re_')) || process.env.RESEND_API_KEY ? 'resend' : 'smtp',
+        smtp_host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        smtp_port: parseInt(process.env.SMTP_PORT, 10) || 465,
+        smtp_user: process.env.SMTP_USER || '',
+        smtp_pass: process.env.SMTP_PASS || process.env.RESEND_API_KEY || process.env.RESEND_KEY || '',
+        recipient_email: process.env.SMTP_RECIPIENT || process.env.RECIPIENT_EMAIL || ''
+      }),
+      crm_config: JSON.stringify({
+        active_crm: process.env.NOTION_TOKEN ? 'notion' : 'none',
+        notion_token: process.env.NOTION_TOKEN || '',
+        notion_db_id: process.env.NOTION_DB_ID || process.env.NOTION_DATABASE_ID || '',
+        airtable_key: '',
+        airtable_base_id: '',
+        airtable_table_name: 'Competitor Intel'
+      })
     };
 
     if (finalKey in defaults) {

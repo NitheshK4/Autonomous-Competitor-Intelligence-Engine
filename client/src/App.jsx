@@ -1438,51 +1438,101 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
               </div>
             </div>
 
-            {/* Email SMTP Config */}
+            {/* Email Config */}
             <div className="glass-panel settings-card" style={{ marginBottom: '24px' }}>
-              <h3 className="settings-card-title">Digest SMTP Email Settings</h3>
+              <h3 className="settings-card-title">Digest Email Configuration</h3>
+              
               <div className="form-group">
-                <label className="form-label">SMTP Server Host</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={emailForm.smtp_host}
-                  onChange={e => setEmailForm({ ...emailForm, smtp_host: e.target.value })}
-                  placeholder="smtp.gmail.com"
-                />
+                <label className="form-label">Email Provider</label>
+                <select 
+                  className="form-select"
+                  value={emailForm.provider || 'smtp'}
+                  onChange={e => setEmailForm({ ...emailForm, provider: e.target.value })}
+                >
+                  <option value="smtp">Standard SMTP (e.g., Gmail)</option>
+                  <option value="resend">Resend.com API</option>
+                </select>
               </div>
-              <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div>
-                  <label className="form-label">SMTP Port</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    value={emailForm.smtp_port}
-                    onChange={e => setEmailForm({ ...emailForm, smtp_port: parseInt(e.target.value, 10) })}
-                    placeholder="587"
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Sender Email Account</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={emailForm.smtp_user}
-                    onChange={e => setEmailForm({ ...emailForm, smtp_user: e.target.value })}
-                    placeholder="your-bot@gmail.com"
-                  />
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">SMTP Password / App Password</label>
-                <input 
-                  type="password" 
-                  className="form-input" 
-                  value={emailForm.smtp_pass}
-                  onChange={e => setEmailForm({ ...emailForm, smtp_pass: e.target.value })}
-                  placeholder="••••••••••••••••"
-                />
-              </div>
+
+              {emailForm.provider === 'resend' ? (
+                <>
+                  <div className="form-group">
+                    <label className="form-label">Resend API Key</label>
+                    <input 
+                      type="password" 
+                      className="form-input" 
+                      value={emailForm.smtp_pass}
+                      onChange={e => setEmailForm({ ...emailForm, smtp_pass: e.target.value })}
+                      placeholder="re_••••••••••••••••"
+                      required
+                    />
+                    <div className="form-help">Enter your Resend API Key (starts with re_).</div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Sender Email Address (Optional)</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={emailForm.smtp_user}
+                      onChange={e => setEmailForm({ ...emailForm, smtp_user: e.target.value })}
+                      placeholder="onboarding@resend.dev"
+                    />
+                    <div className="form-help">
+                      Must be verified on Resend. Leave blank to default to <code>onboarding@resend.dev</code>.
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label className="form-label">SMTP Server Host</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={emailForm.smtp_host}
+                      onChange={e => setEmailForm({ ...emailForm, smtp_host: e.target.value })}
+                      placeholder="smtp.gmail.com"
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                    <div>
+                      <label className="form-label">SMTP Port</label>
+                      <input 
+                        type="number" 
+                        className="form-input" 
+                        value={emailForm.smtp_port}
+                        onChange={e => setEmailForm({ ...emailForm, smtp_port: parseInt(e.target.value, 10) })}
+                        placeholder="587"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Sender Email Account</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={emailForm.smtp_user}
+                        onChange={e => setEmailForm({ ...emailForm, smtp_user: e.target.value })}
+                        placeholder="your-bot@gmail.com"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">SMTP Password / App Password</label>
+                    <input 
+                      type="password" 
+                      className="form-input" 
+                      value={emailForm.smtp_pass}
+                      onChange={e => setEmailForm({ ...emailForm, smtp_pass: e.target.value })}
+                      placeholder="••••••••••••••••"
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="form-group">
                 <label className="form-label">Digest Recipient Email</label>
                 <input 
@@ -1491,6 +1541,7 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
                   value={emailForm.recipient_email}
                   onChange={e => setEmailForm({ ...emailForm, recipient_email: e.target.value })}
                   placeholder="recipient-manager@mycompany.com"
+                  required
                 />
               </div>
               <button 

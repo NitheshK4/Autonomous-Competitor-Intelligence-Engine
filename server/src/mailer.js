@@ -170,7 +170,7 @@ async function sendDigestEmail(workspaceId = 'default', period = 'daily') {
   const htmlContent = generateDigestHtml(newCards, periodName);
   const emailSubject = `[ACIE] Competitor Intelligence Digest - ${newCards.length} New Alerts`;
 
-  const isResend = emailConfig.smtp_pass && emailConfig.smtp_pass.startsWith('re_');
+  const isResend = emailConfig.provider === 'resend' || (emailConfig.smtp_pass && emailConfig.smtp_pass.startsWith('re_'));
 
   try {
     if (isResend) {
