@@ -1460,29 +1460,16 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
                   required
                 />
               </div>
-              <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div>
-                  <label className="form-label">SMTP Port</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    value={emailForm.smtp_port}
-                    onChange={e => setEmailForm({ ...emailForm, smtp_port: parseInt(e.target.value, 10) })}
-                    placeholder="587"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Sender Email Account</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={emailForm.smtp_user}
-                    onChange={e => setEmailForm({ ...emailForm, smtp_user: e.target.value })}
-                    placeholder="your-bot@gmail.com"
-                    required
-                  />
-                </div>
+              <div className="form-group">
+                <label className="form-label">SMTP Port</label>
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  value={emailForm.smtp_port}
+                  onChange={e => setEmailForm({ ...emailForm, smtp_port: parseInt(e.target.value, 10) })}
+                  placeholder="587"
+                  required
+                />
               </div>
               <div className="form-group">
                 <label className="form-label">SMTP Password / App Password / Resend Key</label>
