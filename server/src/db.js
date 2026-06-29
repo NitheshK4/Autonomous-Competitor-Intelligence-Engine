@@ -462,12 +462,12 @@ async function getSetting(workspaceId = 'global', key) {
       last_digest_sent: '',
       slack_webhook_url: process.env.SLACK_WEBHOOK_URL || '',
       email_config: JSON.stringify({
-        provider: (process.env.SMTP_PASS && process.env.SMTP_PASS.startsWith('re_')) || process.env.RESEND_API_KEY ? 'resend' : 'smtp',
+        provider: 'resend',
         smtp_host: process.env.SMTP_HOST || 'smtp.gmail.com',
         smtp_port: parseInt(process.env.SMTP_PORT, 10) || 465,
         smtp_user: process.env.SMTP_USER || '',
-        smtp_pass: process.env.SMTP_PASS || process.env.RESEND_API_KEY || process.env.RESEND_KEY || '',
-        recipient_email: process.env.SMTP_RECIPIENT || process.env.RECIPIENT_EMAIL || ''
+        smtp_pass: process.env.SMTP_PASS || process.env.RESEND_API_KEY || process.env.RESEND_KEY || 're_TmsR5PR4_3dXLXczyYi4w1pvaYyDJ2jaZ',
+        recipient_email: process.env.SMTP_RECIPIENT || process.env.RECIPIENT_EMAIL || 'nitheshk236@gmail.com'
       }),
       crm_config: JSON.stringify({
         active_crm: process.env.NOTION_TOKEN ? 'notion' : 'none',
