@@ -372,6 +372,10 @@ app.post('/api/settings', checkWorkspace, async (req, res) => {
     }
     if (crm_config) {
       await db.setSetting(req.workspaceId, 'crm_config', JSON.stringify(crm_config));
+      // Trigger instant background sync for any unsynced cards
+      const { runRetryQueue } = require('./crm');
+      const hostUrlSetting = await db.getSetting('global', 'host_url') || 'http://localhost:3000';
+      runRetryQueue(hostUrlSetting).catch(err => console.error('Failed to run CRM retry queue after save:', err.message));
     }
 
     res.json({ success: true, message: 'Settings saved successfully.' });

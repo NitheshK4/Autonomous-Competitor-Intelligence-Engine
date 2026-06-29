@@ -446,17 +446,32 @@ async function enqueueCrmRetry(cardId) {
 async function getCrmQueue(workspaceId = null) {
   const db = await getDb();
   let query = `
-    SELECT cq.*, ic.id as card_id, ic.workspace_id, ic.competitor_id, ic.category, ic.summary, ic.impact_score, ic.justification, ic.recommendation, ic.screenshot_path, ic.timestamp, c.name as competitor_name, c.url as competitor_url
-    FROM crm_queue cq
-    JOIN intelligence_cards ic ON cq.card_id = ic.id
+    SELECT 
+      ic.id as card_id,
+      COALESCE(cq.retries, 0) as retries,
+      cq.last_attempt,
+      ic.competitor_id, 
+      ic.category, 
+      ic.summary, 
+      ic.impact_score, 
+      ic.justification, 
+      ic.recommendation, 
+      ic.screenshot_path, 
+      ic.timestamp, 
+      c.name as competitor_name, 
+      c.url as competitor_url, 
+      ic.workspace_id
+    FROM intelligence_cards ic
     JOIN competitors c ON ic.competitor_id = c.id
+    LEFT JOIN crm_queue cq ON ic.id = cq.card_id
+    WHERE (ic.crm_sync_status = 'pending' OR ic.crm_sync_status = 'failed')
   `;
   const params = [];
   if (workspaceId) {
-    query += ' WHERE ic.workspace_id = ?';
+    query += ' AND ic.workspace_id = ?';
     params.push(workspaceId);
   }
-  query += ' ORDER BY cq.id ASC';
+  query += ' ORDER BY ic.timestamp ASC';
   return await db.all(query, params);
 }
 
