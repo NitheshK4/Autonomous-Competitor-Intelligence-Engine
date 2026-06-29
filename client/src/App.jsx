@@ -1265,6 +1265,10 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
 
   const handleGeneralSubmit = (e) => {
     e.preventDefault();
+    if (slackWebhookUrl && !slackWebhookUrl.startsWith('https://hooks.slack.com/') && !slackWebhookUrl.startsWith('https://discord.com/api/webhooks/')) {
+      alert('Error: Slack Webhook URL must be a valid webhook starting with "https://hooks.slack.com/" (or Discord webhooks starting with "https://discord.com/api/webhooks/")');
+      return;
+    }
     onSaveSettings({
       digest_schedule: schedule,
       semantic_threshold: threshold,
