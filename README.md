@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Animated Typing SVG Header -->
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=28&duration=3000&pause=1000&color=6C63FF&center=true&vCenter=true&multiline=true&repeat=true&width=700&height=100&lines=%F0%9F%95%B5%EF%B8%8F+Autonomous+Competitor+Intelligence+Engine;Scrape+%E2%86%92+Detect+%E2%86%92+Classify+%E2%86%92+Alert+%F0%9F%9A%80" alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=28&duration=3000&pause=1000&color=6C63FF&center=true&vCenter=true&multiline=true&repeat=true&width=700&height=100&lines=%F0%9F%95%B5%EF%B8%8F+Autonomous+Competitor+Intelligence+Engine;Scrape+%E2%86%92+Detect+%E2%86%92+Analyze+%E2%86%92+Alert+%F0%9F%9A%80" alt="Typing SVG" />
 
 <br/>
 
@@ -11,10 +11,10 @@
 <br/>
 
 <!-- Animated Shield Badges -->
-[![Python](https://img.shields.io/badge/Python-Semantic_Engine-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a2e)](https://python.org)
 [![Node.js](https://img.shields.io/badge/Node.js-Backend_Server-339933?style=for-the-badge&logo=nodedotjs&logoColor=white&labelColor=1a1a2e)](https://nodejs.org)
 [![React](https://img.shields.io/badge/React-Dashboard_UI-61DAFB?style=for-the-badge&logo=react&logoColor=white&labelColor=1a1a2e)](https://react.dev)
-[![HuggingFace](https://img.shields.io/badge/🤗_HuggingFace-ML_Models-FFD21E?style=for-the-badge&labelColor=1a1a2e)](https://huggingface.co)
+[![HuggingFace](https://img.shields.io/badge/🤗_HuggingFace-ONNX_Embeddings-FFD21E?style=for-the-badge&labelColor=1a1a2e)](https://huggingface.co)
+[![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash_LLM-4285F4?style=for-the-badge&logo=google&logoColor=white&labelColor=1a1a2e)](https://ai.google.dev)
 
 [![Notion](https://img.shields.io/badge/Notion-CRM_Sync-000000?style=for-the-badge&logo=notion&logoColor=white&labelColor=1a1a2e)](https://notion.so)
 [![Slack](https://img.shields.io/badge/Slack-Real_Time_Alerts-4A154B?style=for-the-badge&logo=slack&logoColor=white&labelColor=1a1a2e)](https://slack.com)
@@ -38,16 +38,16 @@
 
 ## 🌟 What Is This?
 
-> **An autonomous, self-healing competitor monitoring engine** that scrapes competitor websites on a schedule, detects *meaningful* content changes using **Python ML sentence embeddings**, classifies them via **zero-shot deep learning**, scores business impact with **LLM inference**, and pushes real-time alerts to **Slack**, **Email**, and **Notion/Airtable CRM** — all within a **512MB RAM** footprint.
+> **An autonomous, self-healing competitor monitoring engine** that scrapes competitor websites on a schedule, detects *meaningful* content changes using **JavaScript ONNX sentence embeddings**, analyzes and scores business impact with **Gemini 2.5 Flash** (or a local **Qwen GGUF** fallback), and pushes real-time alerts to **Slack**, **Email**, and **Notion/Airtable CRM** — all within a **512MB RAM** footprint.
 
 <br/>
 
 <div align="center">
 
-| 🔬 Scrape | 🧠 Detect | 🏷️ Classify | 📊 Score | 🚨 Alert |
-|:---:|:---:|:---:|:---:|:---:|
-| Axios + Puppeteer | Python Sentence-BERT | BART Zero-Shot NLI | Gemini / Qwen LLM | Slack + Email + CRM |
-| Double-engine static & JS rendering | `all-MiniLM-L6-v2` cosine similarity | `facebook/bart-large-mnli` | Impact scoring 1–10 | Real-time webhook push |
+| 🔬 Scrape | 🧠 Detect | 📊 Analyze & Score | 🚨 Alert |
+|:---:|:---:|:---:|:---:|
+| Axios + Puppeteer | JS ONNX Sentence Embeddings | Gemini 2.5 Flash / Qwen GGUF | Slack + Email + CRM |
+| Double-engine static & JS rendering | `Xenova/all-MiniLM-L6-v2` cosine similarity | LLM classification + impact scoring 1–10 | Real-time webhook push |
 
 </div>
 
@@ -61,25 +61,24 @@
 graph TD
     subgraph Input Sources
         A["🧩 Chrome Extension"] -->|"One-Click API"| B("📋 Sequential Queue")
-        C["⏰ Scheduled Runner"] -->|"6h Interval"| B
+        C["⏰ Scheduled Runner"] -->|"Configurable Interval"| B
     end
 
-    subgraph Core ML Pipeline
+    subgraph Core Pipeline
         B --> D["🕸️ Double-Engine Scraper"]
-        D -->|"Cleaned Text"| E["🐍 Python Sentence-BERT Embedder"]
+        D -->|"Cleaned Text"| E["🧠 JS ONNX Sentence Embedder"]
         E -->|"Cosine Similarity"| F{"🔍 Semantic Change?"}
         F -->|"similarity >= 0.85"| G["✅ No Action"]
-        F -->|"similarity < 0.85"| H["🏷️ Python BART Zero-Shot Classifier"]
-        H --> I["🧠 Gemini / Qwen LLM Scorer"]
+        F -->|"similarity < 0.85"| H["🧠 Gemini / Qwen LLM Analyzer"]
     end
 
     subgraph Integrations
-        I --> J["🔄 CRM Adapter"]
+        H --> J["🔄 CRM Adapter"]
         J -->|"Idempotent Write"| K["📓 Notion Database"]
         J -->|"Idempotent Write"| L["📊 Airtable Base"]
         J -->|"On Failure"| M["💾 SQLite Retry Queue"]
-        I -->|"Impact >= 8"| N["💬 Slack Channel"]
-        I -->|"Daily Digest"| O["📧 SMTP Email"]
+        H -->|"Impact >= 8"| N["💬 Slack Channel"]
+        H -->|"Periodic Digest"| O["📧 SMTP Email"]
     end
 
     style K fill:#000000,stroke:#6C63FF,stroke-width:2px,color:#fff
@@ -87,9 +86,8 @@ graph TD
     style O fill:#EA4335,stroke:#6C63FF,stroke-width:2px,color:#fff
     style B fill:#0d1117,stroke:#6C63FF,stroke-width:1px,color:#c9d1d9
     style D fill:#0d1117,stroke:#6C63FF,stroke-width:1px,color:#c9d1d9
-    style E fill:#0d1117,stroke:#3776AB,stroke-width:2px,color:#58a6ff
-    style H fill:#0d1117,stroke:#FFD21E,stroke-width:2px,color:#FFD21E
-    style I fill:#0d1117,stroke:#6C63FF,stroke-width:1px,color:#c9d1d9
+    style E fill:#0d1117,stroke:#FFD21E,stroke-width:2px,color:#FFD21E
+    style H fill:#0d1117,stroke:#6C63FF,stroke-width:1px,color:#c9d1d9
     style F fill:#161b22,stroke:#6C63FF,stroke-width:2px,color:#c9d1d9
 ```
 
@@ -103,22 +101,23 @@ graph TD
 <tr>
 <td width="50%">
 
-### 🐍 Stage 1 — Semantic Change Detection
-**Python** • `sentence-transformers` • `all-MiniLM-L6-v2`
+### 🧠 Stage 1 — Semantic Change Detection
+**JavaScript** • `@huggingface/transformers` • `Xenova/all-MiniLM-L6-v2` (ONNX)
 
-```python
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
+```javascript
+const { pipeline } = require('@huggingface/transformers');
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+const embedder = await pipeline(
+  'feature-extraction',
+  'Xenova/all-MiniLM-L6-v2'
+);
 
-old_embedding = model.encode("Price is $100")
-new_embedding = model.encode("Current Price: $100")
+const oldEmbed = await embedder("Price is $100",
+  { pooling: 'mean', normalize: true });
+const newEmbed = await embedder("Current Price: $100",
+  { pooling: 'mean', normalize: true });
 
-similarity = cosine_similarity(
-    [old_embedding], [new_embedding]
-)[0][0]
-# → 0.93 — Same meaning, NO alert! ✅
+// Cosine similarity → 0.93 — Same meaning, NO alert! ✅
 ```
 
 > ❌ **No string comparison** — the system understands *meaning*, not characters.
@@ -126,46 +125,33 @@ similarity = cosine_similarity(
 </td>
 <td width="50%">
 
-### 🏷️ Stage 2 — Zero-Shot Change Classification
-**Python** • `transformers` • `facebook/bart-large-mnli`
+### 📊 Stage 2 — LLM Analysis, Classification & Scoring
+**Node.js** • `Gemini 2.5 Flash API` / `Qwen2.5-0.5B GGUF`
 
-```python
-from transformers import pipeline
+The detected changes are fed to **Google Gemini 2.5 Flash** (cloud) or a **local Qwen2.5-0.5B GGUF** model (via llama-cli, CPU). The LLM generates:
 
-classifier = pipeline(
-    "zero-shot-classification",
-    model="facebook/bart-large-mnli"
-)
+| Output | Description |
+|:---|:---|
+| 📂 **Category** | LLM-determined change type |
+| 📝 **Summary** | One-paragraph plain-English summary |
+| ❓ **Why It Matters** | Business impact analysis |
+| 📊 **Impact Score** | Integer 1–10 threat/opportunity rating |
+| 📋 **Justification** | Evidence-based reasoning |
+| 🎯 **Recommendation** | Specific action item with timeline |
 
-result = classifier(
-    "We launched GPT Vision.",
-    candidate_labels=[
-        "Pricing Change", "Feature Update",
-        "Hiring Signal", "Content Shift",
-        "Leadership Change", "Other"
-    ]
-)
-# → "Feature Update" (0.87 confidence) 🎯
-```
-
-> ❌ **No rule-based `if "price":`** — uses deep learning NLI.
+> 💡 **No zero-shot classifier** — the LLM handles both classification and scoring in a single inference pass.
 
 </td>
 </tr>
 </table>
 
-### 🧠 Stage 3 — LLM Impact Analysis & Scoring
+### 🔄 Fallback Chain
 
-The classified change is fed to either **Google Gemini 2.5 Flash** (cloud) or a **local Qwen2.5-0.5B GGUF** model (CPU). The LLM generates:
+When cloud or local LLM inference is unavailable (rate limits, cold starts), a **rule-based heuristic engine** kicks in. It uses keyword matching on the diff text to assign categories (pricing change, hiring signal, product update, leadership change) and approximate impact scores.
 
-| Output | Description |
-|:---|:---|
-| 📂 **Category** | Overridden by BART zero-shot classifier output |
-| 📝 **Summary** | One-paragraph plain-English summary of what changed |
-| ❓ **Why It Matters** | Business impact analysis relative to *your* company profile |
-| 📊 **Impact Score** | Integer 1–10 threat/opportunity rating |
-| 📋 **Justification** | Evidence-based reasoning for the score |
-| 🎯 **Recommendation** | Specific action item with timeline |
+```
+Gemini 2.5 Flash API → Qwen2.5-0.5B GGUF (llama-cli) → Rule-Based Heuristic Fallback
+```
 
 <br/>
 
@@ -237,6 +223,7 @@ graph LR
 ├── options.html           # Settings page — server URL & API key configuration
 ├── options.js             # Options logic — save/verify connection settings
 ├── background.js          # Service worker — polls unread count, updates badge
+├── generate_icons.js      # Icon generation utility
 ├── icon16.png             # Toolbar icon (16×16)
 ├── icon48.png             # Extension management icon (48×48)
 └── icon128.png            # Chrome Web Store icon (128×128)
@@ -290,7 +277,7 @@ chrome://extensions/
 <br/>
 
 - 🌐 **DNS Resolution** — A-records and MX-records for server & email hosting detection
-- 🔧 **Header Inspection** — Reads `server`, `x-powered-by`, `x-generator` HTTP headers
+- 🔧 **Header Inspection** — Reads `server`, `x-powered-by` HTTP headers
 - 📊 **Dashboard Widget** — Shows enriched tech profiles directly in the competitor sidebar
 
 </details>
@@ -323,20 +310,20 @@ chrome://extensions/
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-## 🤖 ML Model Configurations
+## 🤖 Model Configurations
 
 <div align="center">
 
-| Component | Model | Format | Size | RAM | Speed |
+| Component | Model | Runtime | Size | RAM | Speed |
 |:---|:---|:---|:---|:---|:---|
-| 🔍 **Semantic Embeddings** | `all-MiniLM-L6-v2` | ONNX / PyTorch | ~90 MB | ~80 MB | < 0.5s |
-| 🏷️ **Zero-Shot Classifier** | `facebook/bart-large-mnli` | PyTorch | ~1.6 GB | ~1.2 GB | ~6s |
-| 🧠 **LLM (Cloud)** | `gemini-2.5-flash` | API | 0 MB | 0 MB | < 1.5s |
-| 🧠 **LLM (Local)** | `Qwen2.5-0.5B-Instruct` | GGUF Q4_K_M | ~382 MB | ~350 MB | 7–15s |
+| 🔍 **Semantic Embeddings** | `Xenova/all-MiniLM-L6-v2` | `@huggingface/transformers` (ONNX, JS) | ~90 MB | ~80 MB | < 0.5s |
+| 🧠 **LLM (Cloud)** | `gemini-2.5-flash` | Google Generative Language API | 0 MB | 0 MB | < 1.5s |
+| 🧠 **LLM (Local)** | `Qwen2.5-0.5B-Instruct` | llama-cli (GGUF Q4_K_M) | ~382 MB | ~350 MB | 7–15s |
+| 🔧 **Fallback** | Rule-based heuristic | Node.js keyword matching | 0 MB | 0 MB | < 1ms |
 
 </div>
 
-> 💡 **Tip:** Set `GEMINI_API_KEY` in `.env` for cloud inference. Without it, the engine falls back to the local Qwen GGUF model automatically.
+> 💡 **Tip:** Set `GEMINI_API_KEY` in `.env` for cloud inference. Without it, the engine falls back to the local Qwen GGUF model automatically. If both fail, a rule-based heuristic handles analysis.
 
 <br/>
 
@@ -348,7 +335,6 @@ chrome://extensions/
 
 ```
 ✅ Node.js    v18+
-✅ Python     3.9+
 ✅ NPM        v10+
 ✅ OS         macOS / Linux / Windows (WSL)
 ```
@@ -363,10 +349,9 @@ cd Autonomous-Competitor-Intelligence-Engine
 # Install Node.js dependencies (root, server, client)
 npm install
 npm run install:all
-
-# Install Python ML dependencies
-pip install sentence-transformers transformers torch
 ```
+
+> 💡 No Python setup required! All ML inference runs natively in Node.js via ONNX or external binaries.
 
 ### 2️⃣ Configure Environment
 
@@ -398,7 +383,7 @@ npm run dev
 npm test
 ```
 
-Validates: Scraping → Semantic Detection → LLM Inference → Zero-Shot Classification → CRM Sync
+Validates: Scraping → Semantic Detection → LLM Inference → CRM Sync
 
 <br/>
 
@@ -470,7 +455,7 @@ Validates: Scraping → Semantic Detection → LLM Inference → Zero-Shot Class
 
 <div align="center">
 
-<img src="https://skillicons.dev/icons?i=python,nodejs,react,vite,sqlite,docker,html,css,js&theme=dark" alt="Tech Stack" />
+<img src="https://skillicons.dev/icons?i=nodejs,react,vite,sqlite,docker,html,css,js&theme=dark" alt="Tech Stack" />
 
 </div>
 
@@ -478,13 +463,13 @@ Validates: Scraping → Semantic Detection → LLM Inference → Zero-Shot Class
 
 | Layer | Technologies |
 |:---|:---|
-| 🐍 **ML Engine** | Python, sentence-transformers, HuggingFace Transformers, PyTorch |
-| 🖥️ **Backend** | Node.js, Express, better-sqlite3, node-cron |
-| 🎨 **Frontend** | React, Vite, Recharts, React Router |
+| 🖥️ **Backend** | Node.js, Express, SQLite (`sqlite3` + `sqlite`), UUID |
+| 🎨 **Frontend** | React 18, Vite 5 |
 | 🕸️ **Scraping** | Axios, Cheerio, Puppeteer (headless Chromium) |
-| 🧠 **AI/LLM** | Gemini 2.5 Flash, Qwen2.5-0.5B GGUF, BART-large-MNLI |
-| 🔌 **Integrations** | Notion API, Airtable API, Slack Webhooks, Nodemailer SMTP |
-| 🧩 **Extension** | Chrome Manifest V3, Service Workers, chrome.storage API |
+| 🧠 **AI/ML** | `@huggingface/transformers` (ONNX embeddings), Gemini 2.5 Flash API, Qwen2.5-0.5B GGUF (llama-cli) |
+| 🔌 **Integrations** | Notion API (`@notionhq/client`), Airtable API (REST), Slack Webhooks, Nodemailer SMTP |
+| 🧩 **Extension** | Chrome Manifest V3, Service Workers, `chrome.storage` API |
+| 🔧 **Tooling** | Concurrently, Nodemon, Docker |
 
 <br/>
 
@@ -496,31 +481,31 @@ Validates: Scraping → Semantic Detection → LLM Inference → Zero-Shot Class
 📦 Autonomous-Competitor-Intelligence-Engine
 ├── 📂 client/                        # React + Vite frontend dashboard
 │   ├── 📂 src/
-│   │   ├── 📂 components/            # Dashboard, Settings, Cards UI
-│   │   ├── 📂 pages/                 # Route pages
-│   │   └── App.jsx                   # Root application
-│   └── vite.config.js
+│   │   ├── App.jsx                   # Root application (single-file dashboard)
+│   │   ├── index.css                 # Global styles
+│   │   └── main.jsx                  # React entry point
+│   ├── index.html                    # HTML template
+│   └── vite.config.js                # Vite configuration
 ├── 📂 server/                        # Node.js + Express backend
 │   └── 📂 src/
-│       ├── scraper.js                # Double-engine web scraper
-│       ├── detector.js               # Semantic change detection orchestrator
-│       ├── semantic_detector.py      # 🐍 Python sentence-BERT embeddings
-│       ├── zero_shot_classifier.py   # 🐍 Python BART zero-shot classifier
-│       ├── llm.js                    # LLM inference (Gemini / Qwen GGUF)
+│       ├── index.js                  # Express server, API routes, scheduler
+│       ├── scraper.js                # Double-engine web scraper (Axios + Puppeteer)
+│       ├── detector.js               # Semantic change detection (ONNX embeddings)
+│       ├── llm.js                    # LLM inference (Gemini API / Qwen GGUF / fallback)
 │       ├── crm.js                    # Notion & Airtable CRM adapter
 │       ├── queue.js                  # Sequential processing queue
 │       ├── slack.js                  # Slack webhook alerts
-│       ├── email.js                  # SMTP email digest
+│       ├── mailer.js                 # SMTP email digest (Nodemailer)
 │       ├── enrichment.js             # DNS + header tech stack enrichment
-│       └── db.js                     # SQLite database layer
+│       ├── db.js                     # SQLite database layer
+│       └── verify-test.js            # Integration test suite
 ├── 📂 extension/                     # 🧩 Chrome Extension (Manifest V3)
 │   ├── manifest.json                 # MV3 config — permissions & service worker
 │   ├── popup.html / popup.js         # One-click competitor registration UI
 │   ├── options.html / options.js     # Server URL & API key settings
 │   ├── background.js                 # Service worker — badge polling
 │   └── icon*.png                     # Extension icons (16, 48, 128)
-├── analytics.py                      # 🐍 CLI analytics dashboard & reports
-├── dummy.py                          # 🐍 Dummy Python file (unused)
+├── data_exporter.py                  # 🐍 Standalone CSV export utility (Python stdlib only)
 ├── Dockerfile                        # Production container config
 ├── package.json                      # Root workspace orchestrator
 └── README.md                         # ← You are here! 📍
@@ -535,7 +520,7 @@ Validates: Scraping → Semantic Detection → LLM Inference → Zero-Shot Class
 ```bash
 # Railway reads the Dockerfile and handles everything:
 # ✅ Chrome installation for Puppeteer
-# ✅ Model binary downloads
+# ✅ Model binary downloads (ONNX + GGUF)
 # ✅ Vite static build
 # ✅ Express server routing
 ```
@@ -553,10 +538,10 @@ Validates: Scraping → Semantic Detection → LLM Inference → Zero-Shot Class
 
 | Issue | Details |
 |:---|:---|
-| ⏳ **Cold Start** | First run downloads ML models (~1.6GB for BART, ~382MB for Qwen). Subsequent runs use cache. |
+| ⏳ **Cold Start** | First run downloads ML models (~90MB for ONNX embeddings, ~382MB for Qwen GGUF). Subsequent runs use cache. |
 | 🤖 **Anti-Bot** | Some sites block headless scrapers. The engine falls back to Axios gracefully. |
 | 📋 **Sequential Queue** | Competitors are processed one-at-a-time to stay under 512MB RAM. |
-| 🏷️ **Classifier Latency** | BART zero-shot takes ~6s per classification on CPU. Cached after first load. |
+| 🔄 **LLM Rate Limits** | Gemini API may rate-limit under heavy use. Auto-falls back to local Qwen GGUF, then to heuristic analysis. |
 
 <br/>
 
