@@ -446,18 +446,16 @@ async function removeFromCrmQueue(cardId) {
 }
 
 // Settings operations
-async function getSetting(workspaceId = 'default', key) {
-  let finalWorkspaceId = workspaceId;
+async function getSetting(workspaceId = 'global', key) {
   let finalKey = key;
-  if (!key) {
+  if (key === undefined) {
     finalKey = workspaceId;
-    finalWorkspaceId = 'default';
   }
   const db = await getDb();
-  let row = await db.get('SELECT value FROM settings WHERE workspace_id = ? AND key = ?', [finalWorkspaceId, finalKey]);
+  let row = await db.get('SELECT value FROM settings WHERE workspace_id = "global" AND key = ?', [finalKey]);
 
   if (!row) {
-    // Dynamically seed default values for the workspace
+    // Dynamically seed default values for the global workspace
     const defaults = {
       api_key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
       digest_schedule: 'daily',
@@ -470,7 +468,7 @@ async function getSetting(workspaceId = 'default', key) {
     if (finalKey in defaults) {
       await db.run(
         'INSERT OR REPLACE INTO settings (workspace_id, key, value) VALUES (?, ?, ?)',
-        [finalWorkspaceId, finalKey, defaults[finalKey]]
+        ['global', finalKey, defaults[finalKey]]
       );
       row = { value: defaults[finalKey] };
     }
@@ -542,19 +540,17 @@ async function getSetting(workspaceId = 'default', key) {
   return val;
 }
 
-async function setSetting(workspaceId = 'default', key, value) {
-  let finalWorkspaceId = workspaceId;
+async function setSetting(workspaceId = 'global', key, value) {
   let finalKey = key;
   let finalValue = value;
   if (value === undefined) {
     finalValue = key;
     finalKey = workspaceId;
-    finalWorkspaceId = 'default';
   }
   const db = await getDb();
   await db.run(
-    'INSERT OR REPLACE INTO settings (workspace_id, key, value) VALUES (?, ?, ?)',
-    [finalWorkspaceId, finalKey, finalValue]
+    'INSERT OR REPLACE INTO settings (workspace_id, key, value) VALUES ("global", ?, ?)',
+    [finalKey, finalValue]
   );
   return finalValue;
 }

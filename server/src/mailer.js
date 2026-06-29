@@ -175,8 +175,9 @@ async function sendDigestEmail(workspaceId = 'default', period = 'daily') {
   try {
     if (isResend) {
       console.log('Sending email via Resend HTTP API...');
-      // Free Resend account can only send from onboarding@resend.dev
-      const fromEmail = 'onboarding@resend.dev';
+      const fromEmail = (emailConfig.smtp_user && emailConfig.smtp_user.includes('@'))
+        ? emailConfig.smtp_user
+        : 'onboarding@resend.dev';
       await axios.post('https://api.resend.com/emails', {
         from: `Competitor Intel Bot <${fromEmail}>`,
         to: emailConfig.recipient_email,
