@@ -103,6 +103,26 @@ async function runMigrations(db) {
       `);
     }
   }
+
+  // 4. Automatically copy default settings to global settings if global settings are missing
+  try {
+    const globalSettings = await db.all('SELECT * FROM settings WHERE workspace_id = "global"');
+    // We check if crm_config is missing or inactive in global
+    const hasGlobalCrm = globalSettings.some(s => s.key === 'crm_config' && s.value && JSON.parse(s.value).active_crm !== 'none');
+    if (!hasGlobalCrm) {
+      console.log('Copying default workspace settings to global workspace settings...');
+      const defaultSettings = await db.all('SELECT * FROM settings WHERE workspace_id = "default"');
+      for (const row of defaultSettings) {
+        // Skip api_key so workspaces keep their generated extensions isolated if needed, or copy it if you want
+        await db.run(
+          'INSERT OR REPLACE INTO settings (workspace_id, key, value) VALUES ("global", ?, ?)',
+          [row.key, row.value]
+        );
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to copy default settings to global settings:', e.message);
+  }
 }
 
 async function getDb() {
