@@ -91,7 +91,7 @@ async function processNextJob() {
       console.log(`Meaningful change detected for ${competitor.name}! Cosine similarity: ${detection.similarity.toFixed(3)}`);
 
       // 4. Retrieve business profile for LLM context
-      const profile = await db.getProfile();
+      const profile = await db.getProfile(competitor.workspace_id);
 
       // 5. Run LLM Analysis
       console.log(`Running local LLM impact scoring...`);
@@ -101,6 +101,7 @@ async function processNextJob() {
       const cardId = uuidv4();
       const newCard = {
         id: cardId,
+        workspace_id: competitor.workspace_id,
         competitor_id: competitorId,
         category: analysis.category,
         summary: analysis.summary,
@@ -118,7 +119,7 @@ async function processNextJob() {
       // Send real-time Slack notification for high impact changes (score >= 8)
       if (newCard.impact_score >= 8) {
         try {
-          const slackUrl = await db.getSetting('slack_webhook_url');
+          const slackUrl = await db.getSetting(competitor.workspace_id, 'slack_webhook_url');
           if (slackUrl) {
             await sendSlackNotification({
               ...newCard,
@@ -132,10 +133,10 @@ async function processNextJob() {
 
       // 6. Push to CRM
       console.log(`Syncing intelligence card to CRM...`);
-      const crmConfigJson = await db.getSetting('crm_config');
+      const crmConfigJson = await db.getSetting(competitor.workspace_id, 'crm_config');
       const crmConfig = crmConfigJson ? JSON.parse(crmConfigJson) : null;
       
-      const hostUrlSetting = await db.getSetting('host_url') || 'http://localhost:3000';
+      const hostUrlSetting = await db.getSetting('global', 'host_url') || 'http://localhost:3000';
       
       const crmResult = await syncCard({
         ...newCard,
@@ -166,7 +167,7 @@ async function processNextJob() {
 
   // 7. Post-pipeline: Process CRM retry queue to retry failed syncs
   try {
-    const hostUrlSetting = await db.getSetting('host_url') || 'http://localhost:3000';
+    const hostUrlSetting = await db.getSetting('global', 'host_url') || 'http://localhost:3000';
     await runRetryQueue(hostUrlSetting);
   } catch (err) {
     console.error('Failed to run CRM retry queue:', err.message);

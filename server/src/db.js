@@ -11,6 +11,100 @@ const DB_PATH = path.join(DB_DIR, 'database.sqlite');
 
 let dbInstance = null;
 
+async function runMigrations(db) {
+  console.log('Running SQLite workspace migrations...');
+  
+  // 1. Add workspace_id columns to existing tables
+  try {
+    await db.exec('ALTER TABLE competitors ADD COLUMN workspace_id TEXT DEFAULT "default"');
+  } catch (e) {}
+  
+  try {
+    await db.exec('ALTER TABLE intelligence_cards ADD COLUMN workspace_id TEXT DEFAULT "default"');
+  } catch (e) {}
+
+  // Remove UNIQUE constraint from competitors(url) if present
+  try {
+    // SQLite doesn't allow dropping constraints easily, but we can drop the unique index
+    await db.exec('DROP INDEX IF EXISTS sqlite_autoindex_competitors_1');
+  } catch (e) {}
+
+  // 2. Migrate profile table to support workspace_id PK
+  const profileInfo = await db.all('PRAGMA table_info(profile)');
+  const profileHasWorkspaceId = profileInfo.some(col => col.name === 'workspace_id');
+  if (!profileHasWorkspaceId) {
+    console.log('Migrating profile table to workspace_id primary key...');
+    try {
+      const oldProfiles = await db.all('SELECT * FROM profile');
+      await db.exec('DROP TABLE IF EXISTS profile');
+      await db.exec(`
+        CREATE TABLE profile (
+          workspace_id TEXT PRIMARY KEY,
+          business_name TEXT,
+          product_desc TEXT,
+          customers TEXT,
+          price_point TEXT
+        )
+      `);
+      if (oldProfiles.length > 0) {
+        const latest = oldProfiles[oldProfiles.length - 1];
+        await db.run(
+          'INSERT OR REPLACE INTO profile (workspace_id, business_name, product_desc, customers, price_point) VALUES (?, ?, ?, ?, ?)',
+          ['default', latest.business_name, latest.product_desc, latest.customers, latest.price_point]
+        );
+      }
+    } catch (err) {
+      console.warn('Profile table migration failed. Recreating...', err.message);
+      await db.exec('DROP TABLE IF EXISTS profile');
+      await db.exec(`
+        CREATE TABLE profile (
+          workspace_id TEXT PRIMARY KEY,
+          business_name TEXT,
+          product_desc TEXT,
+          customers TEXT,
+          price_point TEXT
+        )
+      `);
+    }
+  }
+
+  // 3. Migrate settings table to composite PK (workspace_id, key)
+  const settingsInfo = await db.all('PRAGMA table_info(settings)');
+  const settingsHasWorkspaceId = settingsInfo.some(col => col.name === 'workspace_id');
+  if (!settingsHasWorkspaceId) {
+    console.log('Migrating settings table to composite primary key...');
+    try {
+      const oldSettings = await db.all('SELECT * FROM settings');
+      await db.exec('DROP TABLE IF EXISTS settings');
+      await db.exec(`
+        CREATE TABLE settings (
+          workspace_id TEXT,
+          key TEXT,
+          value TEXT,
+          PRIMARY KEY(workspace_id, key)
+        )
+      `);
+      for (const row of oldSettings) {
+        await db.run(
+          'INSERT OR REPLACE INTO settings (workspace_id, key, value) VALUES (?, ?, ?)',
+          ['default', row.key, row.value]
+        );
+      }
+    } catch (err) {
+      console.warn('Settings table migration failed. Recreating...', err.message);
+      await db.exec('DROP TABLE IF EXISTS settings');
+      await db.exec(`
+        CREATE TABLE settings (
+          workspace_id TEXT,
+          key TEXT,
+          value TEXT,
+          PRIMARY KEY(workspace_id, key)
+        )
+      `);
+    }
+  }
+}
+
 async function getDb() {
   if (dbInstance) return dbInstance;
 
@@ -25,7 +119,7 @@ async function getDb() {
   // Initialize tables
   await dbInstance.exec(`
     CREATE TABLE IF NOT EXISTS profile (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      workspace_id TEXT PRIMARY KEY,
       business_name TEXT,
       product_desc TEXT,
       customers TEXT,
@@ -34,8 +128,9 @@ async function getDb() {
 
     CREATE TABLE IF NOT EXISTS competitors (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      workspace_id TEXT DEFAULT 'default',
       name TEXT,
-      url TEXT UNIQUE,
+      url TEXT,
       interval_hours INTEGER DEFAULT 6,
       scope TEXT DEFAULT 'full', -- 'full', 'pricing', 'careers'
       status TEXT DEFAULT 'active', -- 'active', 'paused', 'error'
@@ -55,6 +150,7 @@ async function getDb() {
 
     CREATE TABLE IF NOT EXISTS intelligence_cards (
       id TEXT PRIMARY KEY,
+      workspace_id TEXT DEFAULT 'default',
       competitor_id INTEGER,
       category TEXT,
       summary TEXT,
@@ -78,8 +174,10 @@ async function getDb() {
     );
 
     CREATE TABLE IF NOT EXISTS settings (
-      key TEXT PRIMARY KEY,
-      value TEXT
+      workspace_id TEXT,
+      key TEXT,
+      value TEXT,
+      PRIMARY KEY(workspace_id, key)
     );
   `);
 
@@ -90,71 +188,66 @@ async function getDb() {
     // Column already exists, safe to ignore
   }
 
-  // Insert default settings if they don't exist
-  const defaultSettings = [
-    { key: 'api_key', value: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) },
-    { key: 'digest_schedule', value: 'daily' }, // 'daily', 'weekly'
-    { key: 'last_digest_sent', value: '' },
-    { key: 'slack_webhook_url', value: '' },
-    { key: 'email_config', value: JSON.stringify({ provider: 'smtp', smtp_host: 'smtp.gmail.com', smtp_port: 465, smtp_user: 'nitheshk236@gmail.com', smtp_pass: 'fxjb jjlz jpvn ufil', recipient_email: 'nitheshk236@gmail.com' }) },
-    { key: 'crm_config', value: JSON.stringify({ active_crm: 'notion', notion_token: 'ntn_S792708178741RX1rBDBsAzhLcuelufsvwhFiaoa6Y42dt', notion_db_id: '38c1d87dab3b80418538c38a8932c590', airtable_key: '', airtable_base_id: '', airtable_table_name: 'Competitor Intel' }) }
-  ];
-
-  for (const setting of defaultSettings) {
-    const exists = await dbInstance.get('SELECT 1 FROM settings WHERE key = ?', [setting.key]);
-    if (!exists) {
-      await dbInstance.run('INSERT INTO settings (key, value) VALUES (?, ?)', [setting.key, setting.value]);
-    }
-  }
+  // Run schema migrations for workspace isolation support
+  await runMigrations(dbInstance);
 
   return dbInstance;
 }
 
 // Profile operations
-async function getProfile() {
+async function getProfile(workspaceId = 'default') {
   const db = await getDb();
-  return await db.get('SELECT * FROM profile ORDER BY id DESC LIMIT 1');
+  return await db.get('SELECT * FROM profile WHERE workspace_id = ?', [workspaceId]);
 }
 
-async function saveProfile(profileData) {
-  const db = await getDb();
-  const existing = await getProfile();
-  if (existing) {
-    await db.run(
-      'UPDATE profile SET business_name = ?, product_desc = ?, customers = ?, price_point = ? WHERE id = ?',
-      [profileData.business_name, profileData.product_desc, profileData.customers, profileData.price_point, existing.id]
-    );
-  } else {
-    await db.run(
-      'INSERT INTO profile (business_name, product_desc, customers, price_point) VALUES (?, ?, ?, ?)',
-      [profileData.business_name, profileData.product_desc, profileData.customers, profileData.price_point]
-    );
+async function saveProfile(workspaceId = 'default', profileData) {
+  let finalWorkspaceId = workspaceId;
+  let finalProfileData = profileData;
+  if (typeof workspaceId === 'object' && workspaceId !== null && !profileData) {
+    finalProfileData = workspaceId;
+    finalWorkspaceId = 'default';
   }
-  return await getProfile();
+  const db = await getDb();
+  await db.run(
+    'INSERT OR REPLACE INTO profile (workspace_id, business_name, product_desc, customers, price_point) VALUES (?, ?, ?, ?, ?)',
+    [finalWorkspaceId, finalProfileData.business_name, finalProfileData.product_desc, finalProfileData.customers, finalProfileData.price_point]
+  );
+  return await getProfile(finalWorkspaceId);
 }
 
 // Competitor operations
-async function addCompetitor(competitor) {
+async function addCompetitor(workspaceId = 'default', competitor) {
+  let finalWorkspaceId = workspaceId;
+  let finalCompetitor = competitor;
+  if (typeof workspaceId === 'object' && workspaceId !== null && !competitor) {
+    finalCompetitor = workspaceId;
+    finalWorkspaceId = 'default';
+  }
   const db = await getDb();
   const now = new Date().toISOString();
   const result = await db.run(
-    'INSERT INTO competitors (name, url, interval_hours, scope, status, js_enabled, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO competitors (workspace_id, name, url, interval_hours, scope, status, js_enabled, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     [
-      competitor.name,
-      competitor.url,
-      competitor.interval_hours || 6,
-      competitor.scope || 'full',
-      competitor.status || 'active',
-      competitor.js_enabled || 0,
+      finalWorkspaceId,
+      finalCompetitor.name,
+      finalCompetitor.url,
+      finalCompetitor.interval_hours || 6,
+      finalCompetitor.scope || 'full',
+      finalCompetitor.status || 'active',
+      finalCompetitor.js_enabled || 0,
       now
     ]
   );
-  return { id: result.lastID, ...competitor, created_at: now };
+  return { id: result.lastID, workspace_id: finalWorkspaceId, ...finalCompetitor, created_at: now };
 }
 
-async function getCompetitors() {
+async function getCompetitors(workspaceId = null) {
   const db = await getDb();
-  return await db.all('SELECT * FROM competitors ORDER BY id DESC');
+  if (workspaceId && typeof workspaceId === 'string') {
+    return await db.all('SELECT * FROM competitors WHERE workspace_id = ? ORDER BY id DESC', [workspaceId]);
+  } else {
+    return await db.all('SELECT * FROM competitors ORDER BY id DESC');
+  }
 }
 
 async function getCompetitorById(id) {
@@ -162,9 +255,15 @@ async function getCompetitorById(id) {
   return await db.get('SELECT * FROM competitors WHERE id = ?', [id]);
 }
 
-async function getCompetitorByUrl(url) {
+async function getCompetitorByUrl(workspaceId = 'default', url) {
+  let finalWorkspaceId = workspaceId;
+  let finalUrl = url;
+  if (!url) {
+    finalUrl = workspaceId;
+    finalWorkspaceId = 'default';
+  }
   const db = await getDb();
-  return await db.get('SELECT * FROM competitors WHERE url = ?', [url]);
+  return await db.get('SELECT * FROM competitors WHERE workspace_id = ? AND url = ?', [finalWorkspaceId, finalUrl]);
 }
 
 async function updateCompetitor(id, updates) {
@@ -216,9 +315,10 @@ async function getScrapeHistory(competitorId) {
 async function saveIntelligenceCard(card) {
   const db = await getDb();
   await db.run(
-    'INSERT INTO intelligence_cards (id, competitor_id, category, summary, impact_score, justification, recommendation, screenshot_path, crm_sync_status, crm_error, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO intelligence_cards (id, workspace_id, competitor_id, category, summary, impact_score, justification, recommendation, screenshot_path, crm_sync_status, crm_error, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [
       card.id,
+      card.workspace_id || 'default',
       card.competitor_id,
       card.category,
       card.summary,
@@ -234,7 +334,13 @@ async function saveIntelligenceCard(card) {
   return card;
 }
 
-async function getIntelligenceCards(filters = {}) {
+async function getIntelligenceCards(workspaceId = null, filters = {}) {
+  let finalWorkspaceId = workspaceId;
+  let finalFilters = filters;
+  if (typeof workspaceId === 'object' && workspaceId !== null && Object.keys(filters).length === 0) {
+    finalFilters = workspaceId;
+    finalWorkspaceId = null;
+  }
   const db = await getDb();
   let query = `
     SELECT ic.*, c.name as competitor_name, c.url as competitor_url 
@@ -244,15 +350,19 @@ async function getIntelligenceCards(filters = {}) {
   const conditions = [];
   const params = [];
 
-  if (filters.competitor_id) {
+  if (finalWorkspaceId) {
+    conditions.push('ic.workspace_id = ?');
+    params.push(finalWorkspaceId);
+  }
+  if (finalFilters.competitor_id) {
     conditions.push('ic.competitor_id = ?');
-    params.push(filters.competitor_id);
+    params.push(finalFilters.competitor_id);
   }
-  if (filters.category) {
+  if (finalFilters.category) {
     conditions.push('ic.category = ?');
-    params.push(filters.category);
+    params.push(finalFilters.category);
   }
-  if (filters.unreadOnly) {
+  if (finalFilters.unreadOnly) {
     conditions.push('ic.is_read = 0');
   }
 
@@ -289,9 +399,9 @@ async function updateIntelligenceCard(id, updates) {
   return await getIntelligenceCardById(id);
 }
 
-async function markAllAsRead() {
+async function markAllAsRead(workspaceId = 'default') {
   const db = await getDb();
-  await db.run('UPDATE intelligence_cards SET is_read = 1');
+  await db.run('UPDATE intelligence_cards SET is_read = 1 WHERE workspace_id = ?', [workspaceId]);
   return true;
 }
 
@@ -313,15 +423,21 @@ async function enqueueCrmRetry(cardId) {
   }
 }
 
-async function getCrmQueue() {
+async function getCrmQueue(workspaceId = null) {
   const db = await getDb();
-  return await db.all(`
-    SELECT cq.*, ic.id as card_id, ic.competitor_id, ic.category, ic.summary, ic.impact_score, ic.justification, ic.recommendation, ic.screenshot_path, ic.timestamp, c.name as competitor_name, c.url as competitor_url
+  let query = `
+    SELECT cq.*, ic.id as card_id, ic.workspace_id, ic.competitor_id, ic.category, ic.summary, ic.impact_score, ic.justification, ic.recommendation, ic.screenshot_path, ic.timestamp, c.name as competitor_name, c.url as competitor_url
     FROM crm_queue cq
     JOIN intelligence_cards ic ON cq.card_id = ic.id
     JOIN competitors c ON ic.competitor_id = c.id
-    ORDER BY cq.id ASC
-  `);
+  `;
+  const params = [];
+  if (workspaceId) {
+    query += ' WHERE ic.workspace_id = ?';
+    params.push(workspaceId);
+  }
+  query += ' ORDER BY cq.id ASC';
+  return await db.all(query, params);
 }
 
 async function removeFromCrmQueue(cardId) {
@@ -330,12 +446,39 @@ async function removeFromCrmQueue(cardId) {
 }
 
 // Settings operations
-async function getSetting(key) {
+async function getSetting(workspaceId = 'default', key) {
+  let finalWorkspaceId = workspaceId;
+  let finalKey = key;
+  if (!key) {
+    finalKey = workspaceId;
+    finalWorkspaceId = 'default';
+  }
   const db = await getDb();
-  const row = await db.get('SELECT value FROM settings WHERE key = ?', [key]);
+  let row = await db.get('SELECT value FROM settings WHERE workspace_id = ? AND key = ?', [finalWorkspaceId, finalKey]);
+
+  if (!row) {
+    // Dynamically seed default values for the workspace
+    const defaults = {
+      api_key: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+      digest_schedule: 'daily',
+      last_digest_sent: '',
+      slack_webhook_url: process.env.SLACK_WEBHOOK_URL || '',
+      email_config: JSON.stringify({ provider: 'smtp', smtp_host: 'smtp.gmail.com', smtp_port: 465, smtp_user: 'nitheshk236@gmail.com', smtp_pass: 'fxjb jjlz jpvn ufil', recipient_email: 'nitheshk236@gmail.com' }),
+      crm_config: JSON.stringify({ active_crm: 'none', notion_token: '', notion_db_id: '', airtable_key: '', airtable_base_id: '', airtable_table_name: 'Competitor Intel' })
+    };
+
+    if (finalKey in defaults) {
+      await db.run(
+        'INSERT OR REPLACE INTO settings (workspace_id, key, value) VALUES (?, ?, ?)',
+        [finalWorkspaceId, finalKey, defaults[finalKey]]
+      );
+      row = { value: defaults[finalKey] };
+    }
+  }
+
   let val = row ? row.value : null;
 
-  if (key === 'crm_config') {
+  if (finalKey === 'crm_config') {
     try {
       const config = val ? JSON.parse(val) : { active_crm: 'none', notion_token: '', notion_db_id: '', airtable_key: '', airtable_base_id: '', airtable_table_name: 'Competitor Intel' };
       let changed = false;
@@ -355,7 +498,7 @@ async function getSetting(key) {
     } catch (e) {
       // Ignore JSON parse errors
     }
-  } else if (key === 'email_config') {
+  } else if (finalKey === 'email_config') {
     try {
       const config = val ? JSON.parse(val) : { provider: 'smtp', smtp_host: '', smtp_port: 587, smtp_user: '', smtp_pass: '', recipient_email: '' };
       let changed = false;
@@ -386,11 +529,11 @@ async function getSetting(key) {
     } catch (e) {
       // Ignore JSON parse errors
     }
-  } else if (key === 'slack_webhook_url') {
+  } else if (finalKey === 'slack_webhook_url') {
     if ((!val || val === '') && process.env.SLACK_WEBHOOK_URL) {
       val = process.env.SLACK_WEBHOOK_URL;
     }
-  } else if (key === 'api_key') {
+  } else if (finalKey === 'api_key') {
     if ((!val || val === '') && process.env.API_KEY) {
       val = process.env.API_KEY;
     }
@@ -399,13 +542,21 @@ async function getSetting(key) {
   return val;
 }
 
-async function setSetting(key, value) {
+async function setSetting(workspaceId = 'default', key, value) {
+  let finalWorkspaceId = workspaceId;
+  let finalKey = key;
+  let finalValue = value;
+  if (value === undefined) {
+    finalValue = key;
+    finalKey = workspaceId;
+    finalWorkspaceId = 'default';
+  }
   const db = await getDb();
   await db.run(
-    'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?',
-    [key, value, value]
+    'INSERT OR REPLACE INTO settings (workspace_id, key, value) VALUES (?, ?, ?)',
+    [finalWorkspaceId, finalKey, finalValue]
   );
-  return value;
+  return finalValue;
 }
 
 module.exports = {

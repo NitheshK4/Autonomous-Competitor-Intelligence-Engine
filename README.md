@@ -520,6 +520,7 @@ Validates: Scraping → Semantic Detection → LLM Inference → Zero-Shot Class
 │   ├── background.js                 # Service worker — badge polling
 │   └── icon*.png                     # Extension icons (16, 48, 128)
 ├── analytics.py                      # 🐍 CLI analytics dashboard & reports
+├── dummy.py                          # 🐍 Dummy Python file (unused)
 ├── Dockerfile                        # Production container config
 ├── package.json                      # Root workspace orchestrator
 └── README.md                         # ← You are here! 📍

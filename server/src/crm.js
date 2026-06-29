@@ -233,18 +233,20 @@ async function runRetryQueue(hostUrl = 'http://localhost:3000') {
   }
 
   console.log(`Processing CRM retry queue: ${queue.length} items pending...`);
-  const crmConfigJson = await db.getSetting('crm_config');
-  const crmConfig = crmConfigJson ? JSON.parse(crmConfigJson) : null;
-
-  if (!crmConfig || crmConfig.active_crm === 'none') {
-    console.log('Skipping retry queue: No CRM active configuration.');
-    return { processed: queue.length, successes: 0 };
-  }
 
   let successes = 0;
   for (const item of queue) {
+    const crmConfigJson = await db.getSetting(item.workspace_id || 'default', 'crm_config');
+    const crmConfig = crmConfigJson ? JSON.parse(crmConfigJson) : null;
+
+    if (!crmConfig || crmConfig.active_crm === 'none') {
+      console.log(`Skipping retry queue item ${item.card_id}: No active CRM configuration.`);
+      continue;
+    }
+
     const card = {
       id: item.card_id,
+      workspace_id: item.workspace_id,
       competitor_id: item.competitor_id,
       competitor_name: item.competitor_name,
       competitor_url: item.competitor_url,

@@ -26,21 +26,46 @@ async function initHostUrl() {
   const hostUrl = process.env.RAILWAY_STATIC_URL
     ? `https://${process.env.RAILWAY_STATIC_URL}`
     : `http://localhost:${PORT}`;
-  await db.setSetting('host_url', hostUrl);
+  await db.setSetting('global', 'host_url', hostUrl);
   console.log(`Application Host URL configured: ${hostUrl}`);
+}
+
+// ----------------------------------------------------
+// WORKSPACE EXTRACTION MIDDLEWARE
+// ----------------------------------------------------
+function checkWorkspace(req, res, next) {
+  const workspaceId = req.headers['x-workspace-id'] || 'default';
+  req.workspaceId = workspaceId;
+  next();
 }
 
 // ----------------------------------------------------
 // EXTENSION AUTH MIDDLEWARE
 // ----------------------------------------------------
 async function checkExtensionAuth(req, res, next) {
-  const apiKeySetting = await db.getSetting('api_key');
   const requestKey = req.headers['authorization']?.replace('Bearer ', '') || req.query.api_key;
 
-  if (!apiKeySetting || requestKey !== apiKeySetting) {
-    return res.status(401).json({ error: 'Unauthorized: Invalid or missing API Key.' });
+  if (!requestKey) {
+    return res.status(401).json({ error: 'Unauthorized: Missing API Key.' });
   }
-  next();
+
+  try {
+    const dbInst = await db.getDb();
+    // Query setting to find workspace owner of this API key
+    const row = await dbInst.get(
+      'SELECT workspace_id FROM settings WHERE key = "api_key" AND value = ?',
+      [requestKey]
+    );
+
+    if (!row) {
+      return res.status(401).json({ error: 'Unauthorized: Invalid API Key.' });
+    }
+
+    req.workspaceId = row.workspace_id;
+    next();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }
 
 // ----------------------------------------------------
@@ -53,22 +78,22 @@ app.get('/health', (req, res) => {
 });
 
 // Business Profile (Onboarding)
-app.get('/api/profile', async (req, res) => {
+app.get('/api/profile', checkWorkspace, async (req, res) => {
   try {
-    const profile = await db.getProfile();
+    const profile = await db.getProfile(req.workspaceId);
     res.json(profile || null);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/profile', async (req, res) => {
+app.post('/api/profile', checkWorkspace, async (req, res) => {
   try {
     const { business_name, product_desc, customers, price_point } = req.body;
     if (!business_name || !product_desc) {
       return res.status(400).json({ error: 'Business name and product description are required.' });
     }
-    const profile = await db.saveProfile({ business_name, product_desc, customers, price_point });
+    const profile = await db.saveProfile(req.workspaceId, { business_name, product_desc, customers, price_point });
     res.json(profile);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -76,13 +101,13 @@ app.post('/api/profile', async (req, res) => {
 });
 
 // Competitors
-app.get('/api/competitors', async (req, res) => {
+app.get('/api/competitors', checkWorkspace, async (req, res) => {
   try {
-    const list = await db.getCompetitors();
+    const list = await db.getCompetitors(req.workspaceId);
     
     // Enrich with change metrics for dashboard
     const enriched = await Promise.all(list.map(async comp => {
-      const cards = await db.getIntelligenceCards({ competitor_id: comp.id });
+      const cards = await db.getIntelligenceCards(req.workspaceId, { competitor_id: comp.id });
       // Filter changes detected this week
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -100,7 +125,7 @@ app.get('/api/competitors', async (req, res) => {
   }
 });
 
-app.post('/api/competitors', async (req, res) => {
+app.post('/api/competitors', checkWorkspace, async (req, res) => {
   try {
     const { name, url, interval_hours, scope, js_enabled } = req.body;
     if (!name || !url) {
@@ -114,12 +139,12 @@ app.post('/api/competitors', async (req, res) => {
       return res.status(400).json({ error: 'Invalid URL format. Include http:// or https://' });
     }
 
-    const existing = await db.getCompetitorByUrl(url);
+    const existing = await db.getCompetitorByUrl(req.workspaceId, url);
     if (existing) {
-      return res.status(400).json({ error: 'A competitor with this URL is already registered.' });
+      return res.status(400).json({ error: 'A competitor with this URL is already registered in this workspace.' });
     }
 
-    const comp = await db.addCompetitor({
+    const comp = await db.addCompetitor(req.workspaceId, {
       name,
       url,
       interval_hours: parseInt(interval_hours, 10) || 6,
@@ -136,12 +161,14 @@ app.post('/api/competitors', async (req, res) => {
   }
 });
 
-app.get('/api/competitors/:id', async (req, res) => {
+app.get('/api/competitors/:id', checkWorkspace, async (req, res) => {
   try {
     const competitor = await db.getCompetitorById(req.params.id);
-    if (!competitor) return res.status(404).json({ error: 'Competitor not found.' });
+    if (!competitor || competitor.workspace_id !== req.workspaceId) {
+      return res.status(404).json({ error: 'Competitor not found.' });
+    }
 
-    const history = await db.getIntelligenceCards({ competitor_id: req.params.id });
+    const history = await db.getIntelligenceCards(req.workspaceId, { competitor_id: req.params.id });
     const scrapes = await db.getScrapeHistory(req.params.id);
 
     res.json({
@@ -154,8 +181,13 @@ app.get('/api/competitors/:id', async (req, res) => {
   }
 });
 
-app.put('/api/competitors/:id', async (req, res) => {
+app.put('/api/competitors/:id', checkWorkspace, async (req, res) => {
   try {
+    const competitor = await db.getCompetitorById(req.params.id);
+    if (!competitor || competitor.workspace_id !== req.workspaceId) {
+      return res.status(404).json({ error: 'Competitor not found.' });
+    }
+
     const { name, interval_hours, scope, status, js_enabled } = req.body;
     const updates = {};
     if (name) updates.name = name;
@@ -171,8 +203,13 @@ app.put('/api/competitors/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/competitors/:id', async (req, res) => {
+app.delete('/api/competitors/:id', checkWorkspace, async (req, res) => {
   try {
+    const competitor = await db.getCompetitorById(req.params.id);
+    if (!competitor || competitor.workspace_id !== req.workspaceId) {
+      return res.status(404).json({ error: 'Competitor not found.' });
+    }
+
     await db.deleteCompetitor(req.params.id);
     res.json({ success: true });
   } catch (err) {
@@ -180,10 +217,12 @@ app.delete('/api/competitors/:id', async (req, res) => {
   }
 });
 
-app.post('/api/competitors/:id/check', async (req, res) => {
+app.post('/api/competitors/:id/check', checkWorkspace, async (req, res) => {
   try {
     const comp = await db.getCompetitorById(req.params.id);
-    if (!comp) return res.status(404).json({ error: 'Competitor not found.' });
+    if (!comp || comp.workspace_id !== req.workspaceId) {
+      return res.status(404).json({ error: 'Competitor not found.' });
+    }
 
     // Mark as active and reset error
     await db.updateCompetitor(comp.id, { status: 'active' });
@@ -196,10 +235,10 @@ app.post('/api/competitors/:id/check', async (req, res) => {
 });
 
 // Intelligence Feed
-app.get('/api/intelligence', async (req, res) => {
+app.get('/api/intelligence', checkWorkspace, async (req, res) => {
   try {
     const { competitor_id, category, unreadOnly } = req.query;
-    const list = await db.getIntelligenceCards({
+    const list = await db.getIntelligenceCards(req.workspaceId, {
       competitor_id: competitor_id ? parseInt(competitor_id, 10) : undefined,
       category,
       unreadOnly: unreadOnly === 'true'
@@ -210,17 +249,23 @@ app.get('/api/intelligence', async (req, res) => {
   }
 });
 
-// Debug endpoint for checking server stats and variables
-app.get('/api/debug-status', async (req, res) => {
+// Debug endpoint for checking server stats and variables (global fallback)
+app.get('/api/debug-status', checkWorkspace, async (req, res) => {
   try {
-    const list = await db.getCompetitors();
+    const list = await db.getCompetitors(req.workspaceId);
     const dbInst = await db.getDb();
     
     const scrapes = await dbInst.all(
-      'SELECT id, competitor_id, timestamp, length(text_content) as text_len, substr(text_content, 1, 100) as text_preview, screenshot_path FROM scrapes ORDER BY id DESC LIMIT 20'
+      `SELECT s.id, s.competitor_id, s.timestamp, length(s.text_content) as text_len, substr(s.text_content, 1, 100) as text_preview, s.screenshot_path 
+       FROM scrapes s
+       JOIN competitors c ON s.competitor_id = c.id
+       WHERE c.workspace_id = ?
+       ORDER BY s.id DESC LIMIT 20`,
+      [req.workspaceId]
     );
     const cards = await dbInst.all(
-      'SELECT id, competitor_id, timestamp, category, impact_score FROM intelligence_cards ORDER BY id DESC LIMIT 20'
+      'SELECT id, competitor_id, timestamp, category, impact_score FROM intelligence_cards WHERE workspace_id = ? ORDER BY id DESC LIMIT 20',
+      [req.workspaceId]
     );
 
     res.json({
@@ -228,8 +273,7 @@ app.get('/api/debug-status', async (req, res) => {
         NODE_ENV: process.env.NODE_ENV,
         RAILWAY_STATIC_URL: process.env.RAILWAY_STATIC_URL,
         PORT: process.env.PORT,
-        HAS_GEMINI_KEY: !!process.env.GEMINI_API_KEY,
-        GEMINI_KEY_PREFIX: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.substring(0, 6) + '...' : 'none'
+        HAS_GEMINI_KEY: !!process.env.GEMINI_API_KEY
       },
       competitors: list.map(c => ({ id: c.id, name: c.name, status: c.status, last_checked: c.last_checked })),
       scrapes,
@@ -240,36 +284,43 @@ app.get('/api/debug-status', async (req, res) => {
   }
 });
 
-app.post('/api/intelligence/read-all', async (req, res) => {
+app.post('/api/intelligence/read-all', checkWorkspace, async (req, res) => {
   try {
-    await db.markAllAsRead();
+    await db.markAllAsRead(req.workspaceId);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.put('/api/intelligence/:id', async (req, res) => {
+app.put('/api/intelligence/:id', checkWorkspace, async (req, res) => {
   try {
+    const card = await db.getIntelligenceCardById(req.params.id);
+    if (!card || card.workspace_id !== req.workspaceId) {
+      return res.status(404).json({ error: 'Intelligence card not found.' });
+    }
+
     const { is_read } = req.body;
     const updates = {};
     if (typeof is_read !== 'undefined') updates.is_read = is_read ? 1 : 0;
     
-    const card = await db.updateIntelligenceCard(req.params.id, updates);
-    res.json(card);
+    const updated = await db.updateIntelligenceCard(req.params.id, updates);
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/intelligence/:id/retry', async (req, res) => {
+app.post('/api/intelligence/:id/retry', checkWorkspace, async (req, res) => {
   try {
     const card = await db.getIntelligenceCardById(req.params.id);
-    if (!card) return res.status(404).json({ error: 'Intelligence card not found.' });
+    if (!card || card.workspace_id !== req.workspaceId) {
+      return res.status(404).json({ error: 'Intelligence card not found.' });
+    }
 
-    const crmConfigJson = await db.getSetting('crm_config');
+    const crmConfigJson = await db.getSetting(req.workspaceId, 'crm_config');
     const crmConfig = crmConfigJson ? JSON.parse(crmConfigJson) : null;
-    const hostUrlSetting = await db.getSetting('host_url') || 'http://localhost:3000';
+    const hostUrlSetting = await db.getSetting('global', 'host_url') || 'http://localhost:3000';
 
     const syncRes = await syncCard(card, crmConfig, hostUrlSetting);
     if (syncRes.success) {
@@ -283,15 +334,15 @@ app.post('/api/intelligence/:id/retry', async (req, res) => {
 });
 
 // Settings Management
-app.get('/api/settings', async (req, res) => {
+app.get('/api/settings', checkWorkspace, async (req, res) => {
   try {
-    const api_key = await db.getSetting('api_key');
-    const digest_schedule = await db.getSetting('digest_schedule');
-    const last_digest_sent = await db.getSetting('last_digest_sent');
-    const emailConfigStr = await db.getSetting('email_config');
-    const crmConfigStr = await db.getSetting('crm_config');
-    const semantic_threshold = await db.getSetting('semantic_threshold') || '0.85';
-    const slack_webhook_url = await db.getSetting('slack_webhook_url') || '';
+    const api_key = await db.getSetting(req.workspaceId, 'api_key');
+    const digest_schedule = await db.getSetting(req.workspaceId, 'digest_schedule');
+    const last_digest_sent = await db.getSetting(req.workspaceId, 'last_digest_sent');
+    const emailConfigStr = await db.getSetting(req.workspaceId, 'email_config');
+    const crmConfigStr = await db.getSetting(req.workspaceId, 'crm_config');
+    const semantic_threshold = await db.getSetting(req.workspaceId, 'semantic_threshold') || '0.85';
+    const slack_webhook_url = await db.getSetting(req.workspaceId, 'slack_webhook_url') || '';
 
     res.json({
       api_key,
@@ -307,20 +358,20 @@ app.get('/api/settings', async (req, res) => {
   }
 });
 
-app.post('/api/settings', async (req, res) => {
+app.post('/api/settings', checkWorkspace, async (req, res) => {
   try {
     const { api_key, digest_schedule, semantic_threshold, email_config, crm_config, slack_webhook_url } = req.body;
 
-    if (api_key) await db.setSetting('api_key', api_key);
-    if (digest_schedule) await db.setSetting('digest_schedule', digest_schedule);
-    if (semantic_threshold) await db.setSetting('semantic_threshold', semantic_threshold.toString());
-    if (slack_webhook_url !== undefined) await db.setSetting('slack_webhook_url', slack_webhook_url);
+    if (api_key) await db.setSetting(req.workspaceId, 'api_key', api_key);
+    if (digest_schedule) await db.setSetting(req.workspaceId, 'digest_schedule', digest_schedule);
+    if (semantic_threshold) await db.setSetting(req.workspaceId, 'semantic_threshold', semantic_threshold.toString());
+    if (slack_webhook_url !== undefined) await db.setSetting(req.workspaceId, 'slack_webhook_url', slack_webhook_url);
     
     if (email_config) {
-      await db.setSetting('email_config', JSON.stringify(email_config));
+      await db.setSetting(req.workspaceId, 'email_config', JSON.stringify(email_config));
     }
     if (crm_config) {
-      await db.setSetting('crm_config', JSON.stringify(crm_config));
+      await db.setSetting(req.workspaceId, 'crm_config', JSON.stringify(crm_config));
     }
 
     res.json({ success: true, message: 'Settings saved successfully.' });
@@ -329,9 +380,9 @@ app.post('/api/settings', async (req, res) => {
   }
 });
 
-app.post('/api/settings/test-email', async (req, res) => {
+app.post('/api/settings/test-email', checkWorkspace, async (req, res) => {
   try {
-    const resMail = await sendDigestEmail('test');
+    const resMail = await sendDigestEmail(req.workspaceId, 'test');
     if (resMail.success) {
       res.json({ success: true, message: `Test email sent successfully. Included ${resMail.count || 0} cards.` });
     } else {
@@ -378,12 +429,12 @@ app.get('/api/test-page', (req, res) => {
 // CHROME EXTENSION ENDPOINTS
 // ----------------------------------------------------
 app.get('/api/extension/status', checkExtensionAuth, async (req, res) => {
-  res.json({ success: true, status: 'connected', version: '1.0.0' });
+  res.json({ success: true, status: 'connected', version: '1.0.0', workspaceId: req.workspaceId });
 });
 
 app.get('/api/extension/unread-count', checkExtensionAuth, async (req, res) => {
   try {
-    const cards = await db.getIntelligenceCards({ unreadOnly: true });
+    const cards = await db.getIntelligenceCards(req.workspaceId, { unreadOnly: true });
     res.json({ unreadCount: cards.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -403,12 +454,12 @@ app.post('/api/extension/add-competitor', checkExtensionAuth, async (req, res) =
       return res.status(400).json({ error: 'Invalid URL format.' });
     }
 
-    const existing = await db.getCompetitorByUrl(url);
+    const existing = await db.getCompetitorByUrl(req.workspaceId, url);
     if (existing) {
-      return res.status(400).json({ error: 'URL already exists.' });
+      return res.status(400).json({ error: 'URL already exists in this workspace.' });
     }
 
-    const comp = await db.addCompetitor({
+    const comp = await db.addCompetitor(req.workspaceId, {
       name,
       url,
       interval_hours: 6, // Default interval
@@ -428,12 +479,10 @@ app.post('/api/extension/add-competitor', checkExtensionAuth, async (req, res) =
 // Serve frontend static build files in production environment
 const CLIENT_DIST = path.join(__dirname, '..', '..', 'client', 'dist');
 if (fs.existsSync(CLIENT_DIST)) {
+  console.log(`Serving static production build from ${CLIENT_DIST}`);
   app.use(express.static(CLIENT_DIST));
   app.get('*', (req, res) => {
-    // Exclude API paths
-    if (!req.path.startsWith('/api/') && !req.path.startsWith('/screenshots/')) {
-      res.sendFile(path.join(CLIENT_DIST, 'index.html'));
-    }
+    res.sendFile(path.join(CLIENT_DIST, 'index.html'));
   });
 }
 
@@ -447,7 +496,7 @@ async function startCompetitorScheduler() {
   
   const runSchedulerCheck = async () => {
     try {
-      const list = await db.getCompetitors();
+      const list = await db.getCompetitors(); // Unfiltered gets all competitors of all workspaces
       const now = new Date();
       
       for (const comp of list) {
@@ -469,8 +518,7 @@ async function startCompetitorScheduler() {
         }
 
         if (shouldCheck) {
-          console.log(`Scheduler: Competitor ${comp.name} (${comp.url}) check is due. Enqueueing job.`);
-          // Check if queue has space or is already checking
+          console.log(`Scheduler: Competitor ${comp.name} (${comp.url}) in workspace ${comp.workspace_id || 'default'} check is due. Enqueueing.`);
           queue.addJob(comp.id);
         }
       }
@@ -491,31 +539,37 @@ async function startDigestScheduler() {
   console.log('Background email digest scheduler started.');
   setInterval(async () => {
     try {
-      const schedule = await db.getSetting('digest_schedule') || 'daily';
-      const lastSentStr = await db.getSetting('last_digest_sent');
+      const dbInst = await db.getDb();
+      // Fetch all distinct workspaces that have settings configured
+      const workspaces = await dbInst.all('SELECT DISTINCT workspace_id FROM settings');
       const now = new Date();
 
-      let isDue = false;
-      if (!lastSentStr) {
-        // Run on first setup
-        isDue = true;
-      } else {
-        const lastSentDate = new Date(lastSentStr);
-        const diffMs = now - lastSentDate;
-        const diffHours = diffMs / (1000 * 60 * 60);
-        
-        if (schedule === 'daily' && diffHours >= 24) {
-          isDue = true;
-        } else if (schedule === 'weekly' && diffHours >= 24 * 7) {
-          isDue = true;
-        }
-      }
+      for (const ws of workspaces) {
+        const workspaceId = ws.workspace_id;
+        const schedule = await db.getSetting(workspaceId, 'digest_schedule') || 'daily';
+        const lastSentStr = await db.getSetting(workspaceId, 'last_digest_sent');
 
-      if (isDue) {
-        console.log(`Scheduler: ${schedule} digest is due. Sending...`);
-        const res = await sendDigestEmail(schedule);
-        if (res.success) {
-          console.log(`Scheduler: ${schedule} digest successfully processed.`);
+        let isDue = false;
+        if (!lastSentStr) {
+          isDue = true;
+        } else {
+          const lastSentDate = new Date(lastSentStr);
+          const diffMs = now - lastSentDate;
+          const diffHours = diffMs / (1000 * 60 * 60);
+          
+          if (schedule === 'daily' && diffHours >= 24) {
+            isDue = true;
+          } else if (schedule === 'weekly' && diffHours >= 24 * 7) {
+            isDue = true;
+          }
+        }
+
+        if (isDue) {
+          console.log(`Scheduler: ${schedule} digest is due for workspace ${workspaceId}. Sending...`);
+          const res = await sendDigestEmail(workspaceId, schedule);
+          if (res.success) {
+            console.log(`Scheduler: ${schedule} digest successfully processed for workspace ${workspaceId}.`);
+          }
         }
       }
     } catch (e) {
@@ -529,7 +583,7 @@ function startKeepAliveScheduler() {
   console.log('Background keep-alive self-ping scheduler started.');
   setInterval(async () => {
     try {
-      const hostUrl = await db.getSetting('host_url');
+      const hostUrl = await db.getSetting('global', 'host_url');
       if (hostUrl && !hostUrl.includes('localhost')) {
         console.log(`Keep-Alive: Self-pinging endpoint ${hostUrl}/health...`);
         const axios = require('axios');

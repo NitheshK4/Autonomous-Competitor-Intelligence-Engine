@@ -1,5 +1,32 @@
 import React, { useState, useEffect } from 'react';
 
+// Extract or generate Workspace ID per tab session
+const getWorkspaceId = () => {
+  const params = new URLSearchParams(window.location.search);
+  let w = params.get('w');
+  if (!w) {
+    w = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+    params.set('w', w);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+  }
+  return w;
+};
+
+const workspaceId = getWorkspaceId();
+
+// Intercept window.fetch to automatically append x-workspace-id header to all API requests
+const originalFetch = window.fetch;
+window.fetch = function (url, options = {}) {
+  if (typeof url === 'string' && (url.startsWith('/api') || url.startsWith('api/'))) {
+    options.headers = {
+      ...options.headers,
+      'x-workspace-id': workspaceId
+    };
+  }
+  return originalFetch(url, options);
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'feed', 'settings', 'details', 'onboarding'
   const [onboarded, setOnboarded] = useState(true);
@@ -265,6 +292,10 @@ export default function App() {
         </div>
         {onboarded && (
           <nav className="nav-links">
+            <div className="workspace-indicator" style={{ marginRight: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '12px', opacity: 0.6 }}>Workspace:</span>
+              <code style={{ background: 'rgba(255,255,255,0.08)', padding: '4px 8px', borderRadius: '4px', fontSize: '13px', color: 'var(--color-secondary)', fontWeight: 'bold' }}>{workspaceId}</code>
+            </div>
             <button className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
               Dashboard
             </button>
@@ -1258,6 +1289,30 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
       <div className="settings-grid">
         {/* Left Column: Config Forms */}
         <div>
+          {/* Workspace Sharing */}
+          <div className="glass-panel settings-card" style={{ marginBottom: '24px' }}>
+            <h3 className="settings-card-title">Shareable Workspace URL</h3>
+            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '15px' }}>
+              Save, bookmark, or copy this URL to return to this specific isolated workspace session.
+            </p>
+            <div className="api-key-box" style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {window.location.origin + window.location.pathname + "?w=" + workspaceId}
+              </span>
+              <button 
+                className="btn" 
+                style={{ padding: '6px 12px', fontSize: '12px', whiteSpace: 'nowrap' }}
+                onClick={() => {
+                  const url = window.location.origin + window.location.pathname + "?w=" + workspaceId;
+                  navigator.clipboard.writeText(url);
+                  alert('Workspace link copied to clipboard!');
+                }}
+              >
+                📋 Copy Link
+              </button>
+            </div>
+          </div>
+
           {/* Extension API Key */}
           <div className="glass-panel settings-card" style={{ marginBottom: '24px' }}>
             <h3 className="settings-card-title">Chrome Extension Integration</h3>

@@ -122,25 +122,33 @@ function generateDigestHtml(cards, periodName = 'Periodic') {
 }
 
 // Send digest email to recipient
-async function sendDigestEmail(period = 'daily') {
-  const emailConfigJson = await db.getSetting('email_config');
+async function sendDigestEmail(workspaceId = 'default', period = 'daily') {
+  // If period is not daily/weekly/test, check if arguments were shifted
+  let finalWorkspaceId = workspaceId;
+  let finalPeriod = period;
+  if (workspaceId === 'daily' || workspaceId === 'weekly' || workspaceId === 'test') {
+    finalPeriod = workspaceId;
+    finalWorkspaceId = 'default';
+  }
+
+  const emailConfigJson = await db.getSetting(finalWorkspaceId, 'email_config');
   const emailConfig = emailConfigJson ? JSON.parse(emailConfigJson) : null;
 
   if (!emailConfig || !emailConfig.smtp_host || !emailConfig.recipient_email) {
-    console.log('Skipping digest email: SMTP credentials or recipient email not configured.');
+    console.log(`Skipping digest email for workspace ${finalWorkspaceId}: SMTP credentials or recipient email not configured.`);
     return { success: false, reason: 'Credentials not configured' };
   }
 
-  const lastDigest = await db.getSetting('last_digest_sent') || '';
+  const lastDigest = await db.getSetting(finalWorkspaceId, 'last_digest_sent') || '';
   const now = new Date().toISOString();
 
-  // Query all cards since last digest
-  const cards = await db.getIntelligenceCards();
+  // Query all cards since last digest for this workspace
+  const cards = await db.getIntelligenceCards(finalWorkspaceId);
   let newCards = lastDigest
     ? cards.filter(c => new Date(c.timestamp) > new Date(lastDigest))
     : cards; // Send all on first run
 
-  if (period === 'test') {
+  if (finalPeriod === 'test') {
     if (newCards.length === 0) {
       newCards = [{
         competitor_name: 'Example Competitor',
@@ -153,12 +161,12 @@ async function sendDigestEmail(period = 'daily') {
     }
   } else {
     if (newCards.length === 0) {
-      console.log('Skipping digest email: No new competitor changes detected since last digest.');
+      console.log(`Skipping digest email for workspace ${finalWorkspaceId}: No new competitor changes detected since last digest.`);
       return { success: true, reason: 'No new changes' };
     }
   }
 
-  const periodName = period.charAt(0).toUpperCase() + period.slice(1);
+  const periodName = finalPeriod.charAt(0).toUpperCase() + finalPeriod.slice(1);
   const htmlContent = generateDigestHtml(newCards, periodName);
   const emailSubject = `[ACIE] Competitor Intelligence Digest - ${newCards.length} New Alerts`;
 
@@ -201,12 +209,12 @@ async function sendDigestEmail(period = 'daily') {
     }
 
     // Update last digest sent time
-    await db.setSetting('last_digest_sent', now);
-    console.log('Digest email sent successfully.');
+    await db.setSetting(finalWorkspaceId, 'last_digest_sent', now);
+    console.log(`Digest email sent successfully for workspace ${finalWorkspaceId}.`);
     return { success: true, count: newCards.length };
   } catch (err) {
     const errorMsg = err.response?.data?.message || err.message;
-    console.error('Failed to send digest email:', errorMsg);
+    console.error(`Failed to send digest email for workspace ${finalWorkspaceId}:`, errorMsg);
     return { success: false, error: errorMsg };
   }
 }
