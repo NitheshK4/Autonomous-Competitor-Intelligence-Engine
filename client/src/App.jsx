@@ -245,9 +245,13 @@ export default function App() {
     }
   };
 
-  const handleTestEmail = async () => {
+  const handleTestEmail = async (emailConfig) => {
     try {
-      const res = await fetch('/api/settings/test-email', { method: 'POST' });
+      const res = await fetch('/api/settings/test-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email_config: emailConfig })
+      });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Failed to send test email');
@@ -1512,7 +1516,7 @@ function SettingsPage({ settings, profile, feedCards, onSaveSettings, onTestEmai
                 onClick={async () => {
                   setIsSendingEmail(true);
                   try {
-                    await onTestEmail();
+                    await onTestEmail(emailForm);
                   } finally {
                     setIsSendingEmail(false);
                   }

@@ -386,7 +386,8 @@ app.post('/api/settings', checkWorkspace, async (req, res) => {
 
 app.post('/api/settings/test-email', checkWorkspace, async (req, res) => {
   try {
-    const resMail = await sendDigestEmail(req.workspaceId, 'test');
+    const { email_config } = req.body;
+    const resMail = await sendDigestEmail(req.workspaceId, 'test', email_config);
     if (resMail.success) {
       res.json({ success: true, message: `Test email sent successfully. Included ${resMail.count || 0} cards.` });
     } else {

@@ -122,17 +122,22 @@ function generateDigestHtml(cards, periodName = 'Periodic') {
 }
 
 // Send digest email to recipient
-async function sendDigestEmail(workspaceId = 'default', period = 'daily') {
+async function sendDigestEmail(workspaceId = 'default', period = 'daily', overrideConfig = null) {
   // If period is not daily/weekly/test, check if arguments were shifted
   let finalWorkspaceId = workspaceId;
   let finalPeriod = period;
+  let finalOverride = overrideConfig;
   if (workspaceId === 'daily' || workspaceId === 'weekly' || workspaceId === 'test') {
     finalPeriod = workspaceId;
     finalWorkspaceId = 'default';
+    finalOverride = typeof period === 'object' ? period : null;
   }
 
-  const emailConfigJson = await db.getSetting(finalWorkspaceId, 'email_config');
-  const emailConfig = emailConfigJson ? JSON.parse(emailConfigJson) : null;
+  let emailConfig = finalOverride;
+  if (!emailConfig) {
+    const emailConfigJson = await db.getSetting(finalWorkspaceId, 'email_config');
+    emailConfig = emailConfigJson ? JSON.parse(emailConfigJson) : null;
+  }
 
   if (!emailConfig || !emailConfig.smtp_host || !emailConfig.recipient_email) {
     console.log(`Skipping digest email for workspace ${finalWorkspaceId}: SMTP credentials or recipient email not configured.`);
